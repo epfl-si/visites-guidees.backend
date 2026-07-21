@@ -11,10 +11,4 @@ export class AppController {
     return this.appService.getHello();
   }
 
-  @UseGuards(AzureAdGuard)
-  @Get('protected')
-  getProtected(@Req() req) {
-    console.log('User info:', req.user);
-    return { user: req.user };
-  }
 } 
