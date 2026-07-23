@@ -13,9 +13,126 @@ datasource db {
   provider = "postgresql"
 }
 
-model User {
-  sciper     Int    @id
-  email      String @unique
-  givenName  String
-  familyName String
+model reservations {
+  id                  Int               @id @default(autoincrement())
+  firstName           String
+  lastName            String
+  entreprise          String
+  email               String
+  phone               String
+  address             String
+  additionnalAddress  String
+  city                String
+  zip                 Int
+  region              String
+  country             String
+  date                String
+  createdAt           String
+  payment             String
+  numberOfParticipant Int
+  statusId            Int
+  languageId          Int
+  placeId             Int
+  status              status            @relation(fields: [statusId], references: [id])
+  language            languages         @relation(fields: [languageId], references: [id])
+  place               places            @relation(fields: [placeId], references: [id])
+  reservationGuide    reservationGuide?
+}
+
+model blockedPeriods {
+  id                  Int                  @id @default(autoincrement())
+  label               String
+  startDatetime       DateTime
+  endDatetime         DateTime
+  createdAt           String
+  blockedPeriodPlaces blockedPeriodPlace[]
+  blockedPeriodGuides blockedPeriodGuide[]
+}
+
+model languages {
+  id             Int             @id @default(autoincrement())
+  name           String
+  reservations   reservations[]
+  guideLanguages guideLanguage[]
+}
+
+model Users {
+  sciper      Int       @id
+  givenName   String
+  email       String    @unique
+  lastName    String
+  gaspar      String    @unique
+  guideInfoId Int
+  guideInfo   guideInfo @relation(fields: [guideInfoId], references: [sciper])
+}
+
+model places {
+  id                  Int                  @id @default(autoincrement())
+  title               String
+  slug                String
+  picture             String
+  description         String
+  createdAt           String
+  maxPerGroup         Int
+  price               Int
+  conditions          String
+  reservations        reservations[]
+  blockedPeriodPlaces blockedPeriodPlace[]
+}
+
+model blockedPeriodPlace {
+  placeId         Int
+  blockedPeriodId Int
+  blockedPeriod   blockedPeriods @relation(fields: [blockedPeriodId], references: [id])
+  place           places         @relation(fields: [placeId], references: [id])
+
+  @@id([placeId, blockedPeriodId])
+}
+
+model guideLanguage {
+  guideId    Int
+  languageId Int
+  guide      guideInfo @relation(fields: [guideId], references: [sciper])
+  language   languages @relation(fields: [languageId], references: [id])
+
+  @@id([guideId, languageId])
+}
+
+model blockedPeriodGuide {
+  guideSciper     Int
+  blockedPeriodId Int
+  blockedPeriod   blockedPeriods @relation(fields: [blockedPeriodId], references: [id])
+  guide           guideInfo      @relation(fields: [guideSciper], references: [sciper])
+
+  @@id([guideSciper, blockedPeriodId])
+}
+
+model status {
+  id                Int                @id
+  status            String
+  reservations      reservations[]
+  reservationGuides reservationGuide[]
+  guideInfos        guideInfo[]
+}
+
+model reservationGuide {
+  reservationId Int          @id
+  guideSciper   Int
+  updatedAt     String
+  statusId      Int
+  reservation   reservations @relation(fields: [reservationId], references: [id])
+  guide         guideInfo    @relation(fields: [guideSciper], references: [sciper])
+  status        status       @relation(fields: [statusId], references: [id])
+}
+
+model guideInfo {
+  sciper              Int                  @id @unique
+  languages           Int
+  blockedPeriods      Int
+  statusId            Int
+  status              status               @relation(fields: [statusId], references: [id])
+  users               Users[]
+  guideLanguages      guideLanguage[]
+  blockedPeriodGuides blockedPeriodGuide[]
+  reservationGuide    reservationGuide[]
 }
