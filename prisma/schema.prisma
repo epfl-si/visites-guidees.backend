@@ -27,7 +27,7 @@ model reservations {
   region              String
   country             String
   date                String
-  createdAt           String
+  createdAt           DateTime          @default(now())
   payment             String
   numberOfParticipant Int
   statusId            Int
@@ -44,7 +44,7 @@ model blockedPeriods {
   label               String
   startDatetime       DateTime
   endDatetime         DateTime
-  createdAt           String
+  createdAt           DateTime             @default(now())
   blockedPeriodPlaces blockedPeriodPlace[]
   blockedPeriodGuides blockedPeriodGuide[]
 }
@@ -54,6 +54,7 @@ model languages {
   name           String
   reservations   reservations[]
   guideLanguages guideLanguage[]
+  placeLanguages placeLanguage[]
 }
 
 model Users {
@@ -68,16 +69,25 @@ model Users {
 
 model places {
   id                  Int                  @id @default(autoincrement())
-  title               String
-  slug                String
+  title               Json
   picture             String
-  description         String
-  createdAt           String
+  description         Json
+  createdAt           DateTime             @default(now())
   maxPerGroup         Int
   price               Int
-  conditions          String
+  conditions          Json
+  placeLanguages      placeLanguage[]
   reservations        reservations[]
   blockedPeriodPlaces blockedPeriodPlace[]
+}
+
+model placeLanguage {
+  placeId    Int
+  languageId Int
+  place      places    @relation(fields: [placeId], references: [id])
+  language   languages @relation(fields: [languageId], references: [id])
+
+  @@id([placeId, languageId])
 }
 
 model blockedPeriodPlace {
@@ -118,7 +128,7 @@ model status {
 model reservationGuide {
   reservationId Int          @id
   guideSciper   Int
-  updatedAt     String
+  updatedAt     DateTime     @default(now())
   statusId      Int
   reservation   reservations @relation(fields: [reservationId], references: [id])
   guide         guideInfo    @relation(fields: [guideSciper], references: [sciper])
