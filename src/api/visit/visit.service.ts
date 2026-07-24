@@ -1,15 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from './prisma.service';
-import { PrismaClient, places } from '../generated/prisma/client';
-import { placeAndLanguage } from './types/Place';
-import { NotFoundException, InternalServerErrorException } from '@nestjs/common';
+import { PrismaService } from '../../prisma.service';
+import { PrismaClient, places } from '../../../generated/prisma/client';
+import { placeAndLanguage } from '../../types/Place';
+import { NotFoundException, InternalServerErrorException, UnprocessableEntityException } from '@nestjs/common';
 @Injectable()
-export class AppService {
+export class VisitService {
   constructor(private prisma: PrismaService) { }
-  getHello(): string {
-    return 'Hello World!';
-  }
-
 
   getToursInfo(): Promise<places[] | null> {
     return this.prisma.places.findMany();
@@ -43,4 +39,5 @@ export class AppService {
       Languages: languages
     };
   }
+
 }
