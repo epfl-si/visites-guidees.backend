@@ -1,7 +1,7 @@
-import { Controller, Get, Options } from '@nestjs/common';
 import { AppService } from './app.service';
-import { UseGuards, Req } from '@nestjs/common';
-import { AzureAdGuard } from './auth/azure-ad-auth.guard';
+import { places } from '../generated/prisma/client';
+import { placeAndLanguage } from './types/Place';
+import { Controller, Get, Param, ParseIntPipe } from '@nestjs/common';
 @Controller()
 export class AppController {
   constructor(private readonly appService: AppService) { }
@@ -11,4 +11,13 @@ export class AppController {
     return this.appService.getHello();
   }
 
+  @Get('tours')
+  getToursInfo(): Promise<places[] | null> {
+    return this.appService.getToursInfo();
+  }
+
+  @Get('tour/:id/details')
+  getTourDetails(@Param('id', ParseIntPipe) id: number): Promise<placeAndLanguage> {
+    return this.appService.getTourDetails(id);
+  }
 } 
