@@ -1,0 +1,7 @@
+INSERT INTO status (status)
+VALUES
+    ('WAITINGGUIDE'),
+    ('WAITINGVALIDATION'),
+    ('WAITINGPAYMENT'),
+    ('READY'),
+    ('CANCELLED');

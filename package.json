@@ -28,6 +28,7 @@
     "@nestjs/platform-express": "^11.0.1",
     "@prisma/adapter-pg": "^7.9.0",
     "@prisma/client": "^7.9.0",
+    "date-holidays": "^3.34.0",
     "passport": "^0.7.0",
     "passport-azure-ad": "^4.3.5",
     "reflect-metadata": "^0.2.2",

@@ -17,22 +17,23 @@ model reservations {
   id                  Int               @id @default(autoincrement())
   firstName           String
   lastName            String
-  entreprise          String
+  company             String?
   email               String
   phone               String
   address             String
-  additionnalAddress  String
+  additionnalAddress  String?
   city                String
   zip                 Int
   region              String
   country             String
-  date                String
+  visitDate           DateTime          @default(now())
   createdAt           DateTime          @default(now())
   payment             String
   numberOfParticipant Int
   statusId            Int
   languageId          Int
   placeId             Int
+  comments            String?
   status              status            @relation(fields: [statusId], references: [id])
   language            languages         @relation(fields: [languageId], references: [id])
   place               places            @relation(fields: [placeId], references: [id])
@@ -118,7 +119,7 @@ model blockedPeriodGuide {
 }
 
 model status {
-  id                Int                @id
+  id                Int                @id @default(autoincrement())
   status            String
   reservations      reservations[]
   reservationGuides reservationGuide[]
