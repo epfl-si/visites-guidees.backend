@@ -6,7 +6,7 @@ import { UserService } from './user.service';
 import { ReqEntraOauthUser } from '../types/auth';
 @Controller('api/user')
 export class UserController {
-  constructor(private readonly userService: UserService) { }
+  constructor(private readonly userService: UserService) {}
 
   @UseGuards(AzureAdGuard)
   @Get('me')
