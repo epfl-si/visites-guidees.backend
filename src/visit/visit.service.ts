@@ -1,18 +1,18 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { PrismaService } from '../../prisma.service';
-import { places, Prisma } from '../../../generated/prisma/client';
-import { placeAndLanguage } from '../../types/place';
+import { PrismaService } from '../prisma.service';
+import { places, Prisma } from '../../generated/prisma/client';
+import { placeAndLanguage } from '../types/place';
 import {
   NotFoundException,
   InternalServerErrorException,
   UnprocessableEntityException,
 } from '@nestjs/common';
-import { form } from '../../types/form';
+import { form } from '../types/form';
 import Holidays from 'date-holidays';
 
 @Injectable()
 export class VisitService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
   private readonly optionalFields = [
     'company',
     'additionnalAddress',

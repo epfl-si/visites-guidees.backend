@@ -1,6 +1,6 @@
 import { VisitService } from './visit.service';
-import { places } from '../../../generated/prisma/client';
-import { placeAndLanguage } from '../../types/place';
+import { places } from '../../generated/prisma/client';
+import { placeAndLanguage } from '../types/place';
 import {
   Controller,
   Get,
@@ -9,11 +9,11 @@ import {
   Post,
   Body,
 } from '@nestjs/common';
-import { form } from '../../types/form';
+import { form } from '../types/form';
 
 @Controller('api/')
 export class VisitController {
-  constructor(private readonly appService: VisitService) {}
+  constructor(private readonly appService: VisitService) { }
 
   @Get()
   getToursInfo(): Promise<places[] | null> {

@@ -1,12 +1,9 @@
 import { Module } from '@nestjs/common';
-import { VisitController } from './api/visit/visit.controller';
-import { VisitService } from './api/visit/visit.service';
 import { PassportModule } from '@nestjs/passport';
-import { AzureAdStrategy } from './auth/azure-ad.strategy';
+import { AzureAdModule } from './auth/azure-ad.module';
 import { ConfigModule } from '@nestjs/config';
-import { UserController } from './api/user/user.controller';
-import { UserService } from './api/user/user.service';
-import { PrismaService } from './prisma.service';
+import { VisitModule } from './visit/visit.module';
+import { UserModule } from './user/user.module';
 
 @Module({
   imports: [
@@ -14,8 +11,10 @@ import { PrismaService } from './prisma.service';
       isGlobal: true,
     }),
     PassportModule.register({ defaultStrategy: 'azure-ad' }),
+    VisitModule,
+    UserModule,
   ],
-  controllers: [VisitController, UserController],
-  providers: [VisitService, AzureAdStrategy, UserService, PrismaService],
+  controllers: [],
+  providers: [],
 })
-export class AppModule {}
+export class AppModule { }
