@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { AzureAdStrategy } from './azure-ad.strategy';
 
 @Module({
-    providers: [AzureAdStrategy],
+  providers: [AzureAdStrategy],
 })
 
-export class AzureAdModule { }
+export class AzureAdModule {}
