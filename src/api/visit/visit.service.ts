@@ -2,14 +2,23 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../../prisma.service';
 import { PrismaClient, places, Prisma } from '../../../generated/prisma/client';
 import { placeAndLanguage } from '../../types/Place';
-import { NotFoundException, InternalServerErrorException, UnprocessableEntityException } from '@nestjs/common';
+import {
+  NotFoundException,
+  InternalServerErrorException,
+  UnprocessableEntityException,
+} from '@nestjs/common';
 import { form } from '../../types/Form';
 import Holidays from 'date-holidays';
 
 @Injectable()
 export class VisitService {
   constructor(private prisma: PrismaService) { }
-  private readonly optionalFields = ["company", "additionnalAddress", "comments", "region"];
+  private readonly optionalFields = [
+    'company',
+    'additionnalAddress',
+    'comments',
+    'region',
+  ];
   private readonly holidays = new Holidays('CH', 'VD');
 
   getToursInfo(): Promise<places[] | null> {
@@ -62,9 +71,7 @@ export class VisitService {
     return !this.holidays.isHoliday(date);
   }
 
-  isAtLeast7BusinessDaysBefore(
-    visitDate: Date | string,
-  ): boolean {
+  isAtLeast7BusinessDaysBefore(visitDate: Date | string): boolean {
     const today = new Date();
     const visit = new Date(visitDate);
 
@@ -85,7 +92,6 @@ export class VisitService {
         businessDays++;
       }
     }
-
     return businessDays >= 7;
   }
   async createReservationInDB(data: Prisma.reservationsUncheckedCreateInput) {
@@ -99,7 +105,7 @@ export class VisitService {
     return {
       firstName: content.firstName,
       lastName: content.lastName,
-      company: content.company ?? "",
+      company: content.company ?? '',
       email: content.email,
       phone: content.phone,
       address: content.address,
@@ -113,35 +119,39 @@ export class VisitService {
       languageId: Number(content.languageId),
       placeId: Number(content.placeId),
       comments: content.comments || null,
-      payment: "",
+      payment: '',
       statusId: 1,
     };
   }
 
   async register(content: form) {
     Object.entries(content).forEach(([key, value]) => {
-      if (key === "gdprConsent") return;
-      if (!this.optionalFields.includes(key as keyof form)) {
-        if (value === undefined || value === null || value === "") {
+      if (!this.optionalFields.includes(key)) {
+        if (value === undefined || value === null || value === '') {
           throw new BadRequestException(`${key} must be filled.`);
         }
       }
     });
 
     if (!content.gdprConsent) {
-      throw new UnprocessableEntityException("GDPR consent must be accepted.");
+      throw new UnprocessableEntityException('GDPR consent must be accepted.');
     }
 
     const visitDate: Date =
-      typeof content.visitDate === "number" ? new Date(content.visitDate) : content.visitDate;
+      typeof content.visitDate === 'number'
+        ? new Date(content.visitDate)
+        : content.visitDate;
 
     if (!this.isAtLeast7BusinessDaysBefore(visitDate)) {
       throw new UnprocessableEntityException(
-        "The visit date must be at least 7 business days before.",
+        'The visit date must be at least 7 business days before.',
       );
     }
-
-    const reservationData = this.mapToReservationCreateInput(content, visitDate);
+    // TODO :
+    const reservationData = this.mapToReservationCreateInput(
+      content,
+      visitDate,
+    );
 
     const reservation = await this.createReservationInDB(reservationData);
 

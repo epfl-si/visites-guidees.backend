@@ -6,11 +6,11 @@ import { UserService } from './user.service';
 import { ReqEntraOauthUser } from '../../types/Auth';
 @Controller('api/user')
 export class UserController {
-    constructor(private readonly userService: UserService) { }
+  constructor(private readonly userService: UserService) {}
 
-    @UseGuards(AzureAdGuard)
-    @Get('me')
-    getProtected(@Req() req: { "user": ReqEntraOauthUser }) {
-        return this.userService.FormatUserInfo(req.user);
-    }
+  @UseGuards(AzureAdGuard)
+  @Get('me')
+  getProtected(@Req() req: { user: ReqEntraOauthUser }) {
+    return this.userService.FormatUserInfo(req.user);
+  }
 }

@@ -9,10 +9,13 @@ import { UserService } from './api/user/user.service';
 import { PrismaService } from './prisma.service';
 
 @Module({
-  imports: [ConfigModule.forRoot({
-    isGlobal: true,
-  }), PassportModule.register({ defaultStrategy: 'azure-ad' })],
+  imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
+    PassportModule.register({ defaultStrategy: 'azure-ad' }),
+  ],
   controllers: [VisitController, UserController],
   providers: [VisitService, AzureAdStrategy, UserService, PrismaService],
 })
-export class AppModule { }
+export class AppModule {}
