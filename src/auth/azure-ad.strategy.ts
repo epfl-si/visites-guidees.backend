@@ -16,7 +16,6 @@ export class AzureAdStrategy extends PassportStrategy(
       audience: process.env.AZURE_AD_CLIENT_ID!,
       validateIssuer: true,
       passReqToCallback: false,
-      loggingLevel: 'info',
       loggingNoPII: false,
     });
   }

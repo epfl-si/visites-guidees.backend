@@ -15,7 +15,6 @@ async function bootstrap() {
     .setTitle('Guided Tours API')
     .setDescription('API documentation for the Guided Tours application')
     .setVersion('1.0')
-    .addTag('cats')
     .addBearerAuth(
       {
         type: 'http',

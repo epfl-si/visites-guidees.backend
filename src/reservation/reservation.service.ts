@@ -1,17 +1,12 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
 import { places, Prisma } from '../../generated/prisma/client';
-import { placeAndLanguage } from '../types/place';
-import {
-  NotFoundException,
-  InternalServerErrorException,
-  UnprocessableEntityException,
-} from '@nestjs/common';
-import { form } from '../types/form';
+import { UnprocessableEntityException } from '@nestjs/common';
 import Holidays from 'date-holidays';
+import { CreateReservationDto } from './dto/create-reservation.dto';
 
 @Injectable()
-export class VisitService {
+export class ReservationService {
   constructor(private prisma: PrismaService) { }
   private readonly optionalFields = [
     'company',
@@ -23,41 +18,6 @@ export class VisitService {
 
   getToursInfo(): Promise<places[] | null> {
     return this.prisma.places.findMany();
-  }
-
-  async getTourDetails(id: number): Promise<placeAndLanguage> {
-    const place = await this.prisma.places.findUnique({
-      where: { id },
-      include: {
-        placeLanguages: {
-          include: {
-            language: true,
-          },
-        },
-      },
-    });
-
-    if (!place) {
-      throw new NotFoundException(`No place found with id ${id}`);
-    }
-
-    const { placeLanguages, ...placeWithoutLanguages } = place;
-
-    const languages = placeLanguages.map((pl) => ({
-      id: pl.language.id,
-      name: pl.language.name,
-    }));
-
-    if (languages.length === 0) {
-      throw new InternalServerErrorException(
-        `No languages found for place with id ${id}`,
-      );
-    }
-
-    return {
-      ...placeWithoutLanguages,
-      Languages: languages,
-    };
   }
 
   isBusinessDay(date: Date): boolean {
@@ -99,7 +59,7 @@ export class VisitService {
   }
 
   private mapToReservationCreateInput(
-    content: form,
+    content: CreateReservationDto,
     visitDate: Date,
   ): Prisma.reservationsUncheckedCreateInput {
     return {
@@ -124,7 +84,8 @@ export class VisitService {
     };
   }
 
-  async register(content: form) {
+  async register(content: CreateReservationDto) {
+    console.log(typeof content.visitDate);
     Object.entries(content).forEach(([key, value]) => {
       if (!this.optionalFields.includes(key)) {
         if (value === undefined || value === null || value === '') {
@@ -147,7 +108,7 @@ export class VisitService {
         'The visit date must be at least 7 business days before.',
       );
     }
-    // TODO :
+    // TODO : Remove mapping to reservationData and pass content directly to createReservationInDB
     const reservationData = this.mapToReservationCreateInput(
       content,
       visitDate,
@@ -155,7 +116,7 @@ export class VisitService {
 
     const reservation = await this.createReservationInDB(reservationData);
 
-    // Notify the guides
+    // TODO :  Notify the guides
 
     return reservation;
   }
