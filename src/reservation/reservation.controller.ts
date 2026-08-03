@@ -4,11 +4,10 @@ import { CreateReservationDto } from './dto/create-reservation.dto';
 
 @Controller('api/reservation')
 export class ReservationController {
-  constructor(private readonly appService: ReservationService) { }
+  constructor(private readonly appService: ReservationService) {}
 
   @Post('/register')
   Register(@Body() content: CreateReservationDto) {
     return this.appService.register(content);
   }
-
 }

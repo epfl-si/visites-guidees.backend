@@ -7,7 +7,7 @@ import { CreateReservationDto } from './dto/create-reservation.dto';
 
 @Injectable()
 export class ReservationService {
-  constructor(private prisma: PrismaService) { }
+  constructor(private prisma: PrismaService) {}
   private readonly optionalFields = [
     'company',
     'additionnalAddress',
