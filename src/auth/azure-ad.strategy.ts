@@ -1,11 +1,8 @@
 // azure-ad.strategy.ts
 import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
-import {
-  BearerStrategy,
-  IBearerStrategyOptionWithRequest,
-} from 'passport-azure-ad';
-import { ConfigService } from '@nestjs/config';
+import { BearerStrategy } from 'passport-azure-ad';
+import { ReqEntraOauthUser } from '../types/auth';
 
 @Injectable()
 export class AzureAdStrategy extends PassportStrategy(
@@ -19,12 +16,12 @@ export class AzureAdStrategy extends PassportStrategy(
       audience: process.env.AZURE_AD_CLIENT_ID!,
       validateIssuer: true,
       passReqToCallback: false,
-      loggingLevel: 'info', // was 'warn'
-      loggingNoPII: false, // temporarily, for debugging only
+      loggingLevel: 'info',
+      loggingNoPII: false,
     });
   }
 
-  async validate(payload: any) {
+  validate(payload: ReqEntraOauthUser): ReqEntraOauthUser {
     return payload;
   }
 }

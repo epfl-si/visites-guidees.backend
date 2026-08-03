@@ -3,7 +3,7 @@ import { Get } from '@nestjs/common';
 import { UseGuards, Req } from '@nestjs/common';
 import { AzureAdGuard } from '../../auth/azure-ad-auth.guard';
 import { UserService } from './user.service';
-import { ReqEntraOauthUser } from '../../types/Auth';
+import { ReqEntraOauthUser } from '../../types/auth';
 @Controller('api/user')
 export class UserController {
   constructor(private readonly userService: UserService) {}

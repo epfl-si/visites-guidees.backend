@@ -1,11 +1,11 @@
 // azure-ad-auth.guard.ts
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { UnauthorizedException } from '@nestjs/common';
+import { ReqEntraOauthUser } from '../types/auth.js';
 
 @Injectable()
 export class AzureAdGuard extends AuthGuard('azure-ad') {
-  handleRequest(err, user, info) {
+  handleRequest<TUser = ReqEntraOauthUser>(err: any, user: TUser): TUser {
     if (err || !user) {
       throw err || new UnauthorizedException();
     }
