@@ -31,5 +31,6 @@ export interface UserInfo {
   firstName: string;
   lastName: string;
   mail: string;
-  groups: Array<string>;
+  isAdmin: boolean;
+  isGuide: boolean;
 }
