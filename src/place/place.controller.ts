@@ -15,6 +15,8 @@ import { placeAndLanguage } from '../types/place';
 import { UseGuards } from '@nestjs/common';
 import { AzureAdGuard } from '../auth/azure-ad-auth.guard';
 import { ApiBearerAuth } from '@nestjs/swagger';
+import { GroupsGuard } from '../guards/groups.guard';
+import { RequireGroups } from '../decorators/require-groups.decorator';
 
 @Controller('api/place')
 export class PlaceController {
@@ -33,14 +35,16 @@ export class PlaceController {
   }
 
   @Post()
-  @UseGuards(AzureAdGuard)
+  @UseGuards(AzureAdGuard, GroupsGuard)
+  @RequireGroups('guided-tours-admin_AppGrpU')
   @ApiBearerAuth('access-token')
   create(@Body() createPlaceDto: CreatePlaceDto) {
     return this.placeService.create(createPlaceDto);
   }
 
   @Patch(':id')
-  @UseGuards(AzureAdGuard)
+  @UseGuards(AzureAdGuard, GroupsGuard)
+  @RequireGroups('guided-tours-admin_AppGrpU')
   @ApiBearerAuth('access-token')
   update(@Param('id') id: number, @Body() updatePlaceDto: UpdatePlaceDto) {
     return this.placeService.update(+id, updatePlaceDto);
