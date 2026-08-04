@@ -1,23 +1,31 @@
 import { Injectable } from '@nestjs/common';
 import { CreatePlaceDto } from './dto/create-place.dto';
 import { UpdatePlaceDto } from './dto/update-place.dto';
-import { placeAndLanguage } from '../types/place';
 import { PrismaService } from '../prisma.service';
-import { places } from '../../generated/prisma/client';
 import {
   NotFoundException,
   InternalServerErrorException,
 } from '@nestjs/common';
+import {
+  ResponsePlaceDto,
+  ResponsePlaceWithoutLanguagesDto,
+} from './dto/response-place.dto';
 
 @Injectable()
 export class PlaceService {
   constructor(private prisma: PrismaService) {}
 
-  getPlaceInfo(): Promise<places[] | null> {
-    return this.prisma.places.findMany();
+  async getPlaceInfo(): Promise<ResponsePlaceWithoutLanguagesDto[] | null> {
+    const places = await this.prisma.places.findMany();
+
+    if (places.length == 0) {
+      throw new NotFoundException(`No place found `);
+    }
+
+    return places as ResponsePlaceWithoutLanguagesDto[];
   }
 
-  async getPlaceDetails(id: number): Promise<placeAndLanguage> {
+  async getPlaceDetails(id: number): Promise<ResponsePlaceDto | null> {
     const place = await this.prisma.places.findUnique({
       where: { id },
       include: {
@@ -48,8 +56,8 @@ export class PlaceService {
 
     return {
       ...placeWithoutLanguages,
-      Languages: languages,
-    };
+      languages: languages,
+    } as ResponsePlaceDto;
   }
 
   create(createPlaceDto: CreatePlaceDto) {
