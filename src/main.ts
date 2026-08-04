@@ -11,6 +11,8 @@ async function bootstrap() {
 
   app.useGlobalPipes(new ValidationPipe());
 
+  app.setGlobalPrefix('api');
+
   const config = new DocumentBuilder()
     .setTitle('Guided Tours API')
     .setDescription('API documentation for the Guided Tours application')
@@ -27,7 +29,9 @@ async function bootstrap() {
       'access-token', // this name here is important for matching up with @ApiBearerAuth() decorator
     )
     .build();
+
   const documentFactory = () => SwaggerModule.createDocument(app, config);
+
   SwaggerModule.setup('api', app, documentFactory);
 
   app.enableCors({

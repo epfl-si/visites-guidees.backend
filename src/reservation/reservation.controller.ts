@@ -2,7 +2,7 @@ import { ReservationService } from './reservation.service';
 import { Controller, Post, Body, Get } from '@nestjs/common';
 import { CreateReservationDto } from './dto/create-reservation.dto';
 
-@Controller('api/reservation')
+@Controller('reservation')
 export class ReservationController {
   constructor(private readonly reservationService: ReservationService) {}
 

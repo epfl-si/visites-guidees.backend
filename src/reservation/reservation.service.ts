@@ -85,7 +85,6 @@ export class ReservationService {
   }
 
   async register(content: CreateReservationDto) {
-    console.log(typeof content.visitDate);
     Object.entries(content).forEach(([key, value]) => {
       if (!this.optionalFields.includes(key)) {
         if (value === undefined || value === null || value === '') {

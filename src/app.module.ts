@@ -3,6 +3,7 @@ import { PassportModule } from '@nestjs/passport';
 import { ConfigModule } from '@nestjs/config';
 import { ReservationModule } from './reservation/reservation.module';
 import { UserModule } from './user/user.module';
+import { PlaceModule } from './place/place.module';
 
 @Module({
   imports: [
@@ -12,6 +13,7 @@ import { UserModule } from './user/user.module';
     PassportModule.register({ defaultStrategy: 'azure-ad' }),
     ReservationModule,
     UserModule,
+    PlaceModule,
   ],
   controllers: [],
   providers: [],
