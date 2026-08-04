@@ -19,6 +19,7 @@ import { GroupsGuard } from '../guards/groups.guard';
 import { RequireGroups } from '../decorators/require-groups.decorator';
 
 @Controller('place')
+
 export class PlaceController {
   constructor(private readonly placeService: PlaceService) {}
 
@@ -37,6 +38,7 @@ export class PlaceController {
   @Post()
   @UseGuards(AzureAdGuard, GroupsGuard)
   @RequireGroups('guided-tours-admin_AppGrpU')
+
   @ApiBearerAuth('access-token')
   create(@Body() createPlaceDto: CreatePlaceDto) {
     return this.placeService.create(createPlaceDto);

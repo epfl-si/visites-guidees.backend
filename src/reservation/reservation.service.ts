@@ -119,4 +119,22 @@ export class ReservationService {
 
     return reservation;
   }
+
+  async getLastReservations() {
+    const lastReservations = await this.prisma.reservations.findMany({
+      select: {
+        id: true,
+        company: true,
+        email: true,
+        visitDate: true,
+        status: true,
+      },
+      orderBy: {
+        createdAt: 'asc',
+      },
+      take: 10,
+    });
+
+    return lastReservations;
+  }
 }
