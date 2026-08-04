@@ -18,7 +18,7 @@ import { ApiBearerAuth } from '@nestjs/swagger';
 import { GroupsGuard } from '../guards/groups.guard';
 import { RequireGroups } from '../decorators/require-groups.decorator';
 
-@Controller('api/place')
+@Controller('place')
 export class PlaceController {
   constructor(private readonly placeService: PlaceService) {}
 
