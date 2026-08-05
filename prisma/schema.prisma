@@ -61,12 +61,11 @@ model languages {
 
 model Users {
   sciper      Int       @id
-  givenName   String
-  email       String    @unique
   lastName    String
+  firstName   String
+  email       String    @unique
   gaspar      String    @unique
-  guideInfoId Int
-  guideInfo   guideInfo @relation(fields: [guideInfoId], references: [sciper])
+  guideInfo   guideInfo?
 }
 
 model places {
@@ -139,11 +138,9 @@ model reservationGuide {
 
 model guideInfo {
   sciper              Int                  @id @unique
-  languages           Int
-  blockedPeriods      Int
   statusId            Int
   status              status               @relation(fields: [statusId], references: [id])
-  users               Users[]
+  user                Users                @relation(fields: [sciper], references: [sciper])
   guideLanguages      guideLanguage[]
   blockedPeriodGuides blockedPeriodGuide[]
   reservationGuide    reservationGuide[]
