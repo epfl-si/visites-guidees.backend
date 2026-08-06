@@ -139,6 +139,7 @@ model reservationGuide {
 model guideInfo {
   sciper              Int                  @id @unique
   statusId            Int
+  phone               String
   status              status               @relation(fields: [statusId], references: [id])
   user                Users                @relation(fields: [sciper], references: [sciper])
   guideLanguages      guideLanguage[]
