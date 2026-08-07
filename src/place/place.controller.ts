@@ -22,7 +22,7 @@ import { RequireGroups } from '../decorators/require-groups.decorator';
 
 @Controller({ path: 'places', version: '1' })
 export class PlaceController {
-  constructor(private readonly placeService: PlaceService) {}
+  constructor(private readonly placeService: PlaceService) { }
 
   @Get()
   @ApiResponse({ type: [ResponsePlaceListDto] })

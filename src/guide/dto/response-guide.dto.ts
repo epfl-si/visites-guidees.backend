@@ -25,3 +25,15 @@ export class ResponseGuidesDto {
   @IsString()
   status!: string;
 }
+
+export class ResponseCreationGuide {
+
+  @IsNumber()
+  sciper!: number;
+
+  @IsString()
+  firstName!: string;
+
+  @IsString()
+  lastName!: string;
+}
