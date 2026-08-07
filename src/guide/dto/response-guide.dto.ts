@@ -14,8 +14,9 @@ export class ResponseGuidesDto {
   @IsString()
   email!: string;
 
-  @IsNumber()
-  phone!: string;
+  @IsArray()
+  @ValidateNested({ each: true })
+  phone!: string[];
 
   @IsArray()
   @ValidateNested({ each: true })
