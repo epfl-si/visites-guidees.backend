@@ -24,7 +24,7 @@ import { ApiResponse } from '@nestjs/swagger';
 @Controller('place')
 
 export class PlaceController {
-  constructor(private readonly placeService: PlaceService) {}
+  constructor(private readonly placeService: PlaceService) { }
 
   @Get()
   @ApiResponse({ type: [ResponsePlaceWithoutLanguagesDto] })
