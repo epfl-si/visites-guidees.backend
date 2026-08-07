@@ -21,6 +21,7 @@
   },
   "dependencies": {
     "@azure/msal-node": "^5.4.1",
+    "@nestjs-modules/mailer": "^2.3.7",
     "@nestjs/common": "^11.0.1",
     "@nestjs/config": "^4.0.4",
     "@nestjs/core": "^11.0.1",
@@ -33,6 +34,7 @@
     "class-transformer": "^0.5.1",
     "class-validator": "^0.15.1",
     "date-holidays": "^3.34.0",
+    "nodemailer": "^9.0.5",
     "passport": "^0.7.0",
     "passport-azure-ad": "^4.3.5",
     "reflect-metadata": "^0.2.2",
@@ -48,6 +50,7 @@
     "@types/jest": "^30.0.0",
     "@types/mocha": "^10.0.10",
     "@types/node": "^24.0.0",
+    "@types/nodemailer": "^8.0.1",
     "@types/passport-azure-ad": "^4.3.6",
     "@types/supertest": "^7.0.0",
     "eslint": "^9.18.0",
