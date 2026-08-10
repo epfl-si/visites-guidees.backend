@@ -1,81 +1,87 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
-import {
-  guideInfo,
-  guideLanguage,
-  languages,
-  status,
-  Users,
-} from '../../generated/prisma/client';
-import { ResponseCreationGuide, ResponseGuidesDto } from './dto/response-guide.dto';
-import { LanguageDto } from '../language/dto/language.dto';
-import { callEPFLApi } from '../lib/api';
-import { ResponseFromEPFLApiSpecific } from '../types/user';
-
+import { Guide, User, Language } from '../../generated/prisma/client';
+import { ResponseGuideDto } from './dto/response.dto';
+import { CreateGuideDto } from './dto/create.dto';
+import { ApiService } from '../services/api/api.service';
+import { Person } from './interfaces/person.interface';
+import { AppLogger as Logger } from '@/logger.service';
 
 @Injectable()
 export class GuideService {
-  constructor(private prisma: PrismaService) { }
+  private readonly logger = new Logger(GuideService.name);
 
-  flattenGuideInfo(
-    obj: guideInfo & { user: Users } & {
-      guideLanguages: (guideLanguage & { language: languages })[];
-    } & { status: status },
-  ): ResponseGuidesDto {
-    const { user, guideLanguages, status, ...guide } = obj;
-    console.log(guideLanguages)
-    const languages: LanguageDto[] = guideLanguages.map(item => item.language);
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly apiService: ApiService,
+  ) {}
 
-    return { ...guide, ...user, ...status, languages };
+  private toResponseDto(
+    guide: Guide & { user: User; languages: Language[] },
+  ): ResponseGuideDto {
+    return {
+      id: guide.id,
+      status: guide.status,
+      phone: guide.phone,
+      firstName: guide.user.firstName,
+      lastName: guide.user.lastName,
+      email: guide.user.email,
+      username: guide.user.username,
+      languages: guide.languages,
+    };
   }
 
-  async findAll(): Promise<ResponseGuidesDto[]> {
-    console.log('find')
-    const guides = await this.prisma.guideInfo.findMany({
-      include: {
-        user: true,
-        guideLanguages: {
-          include: { language: true },
-        },
-        status: true,
+  async list(): Promise<ResponseGuideDto[]> {
+    const guides = await this.prisma.guide.findMany({
+      include: { user: true, languages: true },
+    });
+
+    if (guides.length === 0) {
+      this.logger.warn('No guide found');
+      throw new NotFoundException('No guide found');
+    }
+
+    this.logger.log(`Listed ${guides.length} guide(s)`);
+    return guides.map((guide) => this.toResponseDto(guide));
+  }
+
+  async create(createGuideDto: CreateGuideDto): Promise<ResponseGuideDto> {
+    const person = await this.apiService.callEPFLApi<Person>(
+      `v1/persons/${createGuideDto.sciper}`,
+    );
+
+    if (person == null) {
+      throw new NotFoundException('No person found with this sciper');
+    }
+
+    const id = Number(person.id);
+    const phone = person.phones.map((p) => p.number);
+
+    await this.prisma.user.upsert({
+      where: { id },
+      update: {
+        email: person.email,
+        firstName: person.firstname,
+        lastName: person.lastname,
+        username: person.account.username,
+      },
+      create: {
+        id,
+        email: person.email,
+        firstName: person.firstname,
+        lastName: person.lastname,
+        username: person.account.username,
       },
     });
 
-    console.log(guides)
-
-    return guides.map((guide) => this.flattenGuideInfo(guide));
-  }
-
-  async add(sciper: number): Promise<ResponseCreationGuide> {
-
-    const user = await callEPFLApi<ResponseFromEPFLApiSpecific>(`v1/persons/${sciper}`)
-
-    if (user == null) {
-      throw new NotFoundException()
-    }
-
-    await this.prisma.users.upsert({
-      where: { sciper: Number(user.id) },
-      update: { email: user.email, firstName: user.firstname, lastName: user.lastname, gaspar: user.account.username },
-      create: { sciper: Number(user.id), email: user.email, firstName: user.firstname, lastName: user.lastname, gaspar: user.account.username },
-    })
-
-    const phones: string[] = []
-
-    for (const phone of user.phones) {
-      phones.push(phone.number)
-    }
-
-    await this.prisma.guideInfo.upsert({
-      where: { sciper: Number(user.id) },
+    const guide = await this.prisma.guide.upsert({
+      where: { id },
       update: {},
-      create: { sciper: Number(user.id), statusId: 6, phone: phones },
-    })
+      create: { id, phone },
+      include: { user: true, languages: true },
+    });
 
-    return {
-      "sciper": Number(user.id),
-      "firstName": user.firstname,
-      "lastName": user.lastname
-    }
+    this.logger.log(`Created guide ${id}`);
+    return this.toResponseDto(guide);
   }
 }

@@ -1,39 +1,46 @@
-import { IsNumber, IsString, IsArray, ValidateNested } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
+import {
+  IsArray,
+  IsEnum,
+  IsNumber,
+  IsString,
+  ValidateNested,
+} from 'class-validator';
+import { GuideStatus } from '../../../generated/prisma/client';
 import { LanguageDto } from '../../language/dto/language.dto';
 
-export class ResponseGuidesDto {
+export class ResponseGuideDto {
+  @ApiProperty()
   @IsNumber()
-  sciper!: number;
+  id!: number;
 
+  @ApiProperty()
   @IsString()
   firstName!: string;
 
+  @ApiProperty()
   @IsString()
   lastName!: string;
 
+  @ApiProperty()
   @IsString()
   email!: string;
 
+  @ApiProperty()
+  @IsString()
+  username!: string;
+
+  @ApiProperty({ type: [String] })
   @IsArray()
-  @ValidateNested({ each: true })
+  @IsString({ each: true })
   phone!: string[];
 
+  @ApiProperty({ enum: GuideStatus })
+  @IsEnum(GuideStatus)
+  status!: GuideStatus;
+
+  @ApiProperty({ type: [LanguageDto] })
   @IsArray()
   @ValidateNested({ each: true })
   languages!: LanguageDto[];
-
-  @IsString()
-  status!: string;
-}
-
-export class ResponseCreationGuide {
-
-  @IsNumber()
-  sciper!: number;
-
-  @IsString()
-  firstName!: string;
-
-  @IsString()
-  lastName!: string;
 }
