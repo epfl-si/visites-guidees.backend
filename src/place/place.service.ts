@@ -10,7 +10,7 @@ import { AppLogger as Logger } from '@/logger.service';
 export class PlaceService {
   private readonly logger = new Logger(PlaceService.name);
 
-  constructor(private readonly prisma: PrismaService) { }
+  constructor(private readonly prisma: PrismaService) {}
 
   async list(): Promise<ResponsePlaceListDto[]> {
     const places = await this.prisma.place.findMany();
