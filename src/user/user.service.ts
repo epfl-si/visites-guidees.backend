@@ -1,13 +1,16 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ReqEntraOauthUser, UserInfo } from '../types/auth';
 import { PrismaService } from '../prisma.service';
-import { ResponseFromEPFLApi } from '../types/user';
+import { PersonsSearchResponse } from '../guide/interfaces/person.interface';
 import { ResponseUserSearch } from './dto/response-user-dto';
-import { callEPFLApi } from '../lib/api';
+import { ApiService } from '../services/api/api.service';
 
 @Injectable()
 export class UserService {
-  constructor(private prisma: PrismaService) { }
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly apiService: ApiService,
+  ) {}
 
   async FormatUserInfo(Req: ReqEntraOauthUser): Promise<UserInfo> {
     const guide = await this.prisma.guide.findUnique({
@@ -29,9 +32,8 @@ export class UserService {
   }
 
   async search(params: string) {
-
-    const data: ResponseFromEPFLApi = await callEPFLApi<ResponseFromEPFLApi>(
-      `v1/persons?query=${params}&pagesize=5`
+    const data = await this.apiService.callEPFLApi<PersonsSearchResponse>(
+      `v1/persons?query=${params}&pagesize=5`,
     );
 
     if (!data) {
@@ -40,13 +42,13 @@ export class UserService {
 
     const users: ResponseUserSearch[] = [];
 
-    data.persons.map((u, _index) => (
+    data.persons.forEach((u) => {
       users.push({
         sciper: Number(u.id),
         lastName: u.lastname,
-        firstName: u.firstname
-      })
-    ));
+        firstName: u.firstname,
+      });
+    });
 
     return users;
   }
