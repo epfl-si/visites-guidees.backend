@@ -14,7 +14,7 @@ import {
   Text,
   Preview,
   Button,
-} from 'react-email';
+} from '@react-email/components';
 
 export function ReservationNotification({
   data,

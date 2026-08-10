@@ -126,7 +126,7 @@ export class ReservationService {
         id: true,
         company: true,
         email: true,
-        visitDate: true,
+        date: true,
         status: true,
       },
       orderBy: {

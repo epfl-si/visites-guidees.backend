@@ -1,8 +1,8 @@
-// place.entity.ts
+// reservation.entity.ts
 import { ApiProperty } from '@nestjs/swagger';
 import {
-  reservations as PrismaReservation,
-  placeLanguage,
+  Reservation as PrismaReservation,
+  ReservationStatus,
 } from '../../../generated/prisma/client';
 import {
   IsNumber,
@@ -10,6 +10,7 @@ import {
   IsString,
   IsNotEmpty,
   IsDate,
+  IsEnum,
 } from 'class-validator';
 
 export class ReservationEntity implements PrismaReservation {
@@ -31,7 +32,7 @@ export class ReservationEntity implements PrismaReservation {
   @ApiProperty()
   @IsOptional()
   @IsString()
-  company!: string;
+  company!: string | null;
 
   @ApiProperty()
   @IsNotEmpty()
@@ -50,7 +51,7 @@ export class ReservationEntity implements PrismaReservation {
   @ApiProperty()
   @IsString()
   @IsOptional()
-  additionnalAddress!: string;
+  additionalAddress!: string | null;
 
   @ApiProperty()
   @IsString()
@@ -58,9 +59,9 @@ export class ReservationEntity implements PrismaReservation {
   city!: string;
 
   @ApiProperty()
-  @IsNumber()
+  @IsString()
   @IsNotEmpty()
-  zip!: number;
+  zip!: string;
 
   @ApiProperty()
   @IsString()
@@ -75,17 +76,17 @@ export class ReservationEntity implements PrismaReservation {
   @ApiProperty()
   @IsDate()
   @IsNotEmpty()
-  visitDate!: Date;
+  date!: Date;
 
   @ApiProperty()
   @IsNumber()
   @IsNotEmpty()
-  numberOfParticipant!: number;
+  participantNumber!: number;
 
   @ApiProperty()
   @IsString()
   @IsOptional()
-  comments!: string;
+  comment!: string | null;
 
   @ApiProperty()
   @IsString()
@@ -93,9 +94,9 @@ export class ReservationEntity implements PrismaReservation {
   payment!: string;
 
   @ApiProperty()
-  @IsNumber()
+  @IsEnum(ReservationStatus)
   @IsNotEmpty()
-  statusId!: number;
+  status!: ReservationStatus;
 
   @ApiProperty()
   @IsNumber()
@@ -112,6 +113,8 @@ export class ReservationEntity implements PrismaReservation {
   @IsNotEmpty()
   createdAt!: Date;
 
-  @ApiProperty({ type: () => [Object], required: false })
-  placeLanguages?: placeLanguage[];
+  @ApiProperty()
+  @IsDate()
+  @IsNotEmpty()
+  updatedAt!: Date;
 }
