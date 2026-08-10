@@ -84,7 +84,7 @@ export class ReservationService {
       zip: content.zip,
       country: content.country,
       date,
-      participantNumber: Number(content.numberOfParticipant),
+      participantNumber: Number(content.participantNumber),
       languageId: Number(content.languageId),
       placeId: Number(content.placeId),
       comment: content.comments || null,
@@ -106,10 +106,7 @@ export class ReservationService {
       throw new UnprocessableEntityException('GDPR consent must be accepted.');
     }
 
-    const visitDate: Date =
-      typeof content.visitDate === 'number'
-        ? new Date(content.visitDate)
-        : content.visitDate;
+    const visitDate = new Date(content.date);
 
     if (!this.isAtLeast7BusinessDaysBefore(visitDate)) {
       throw new UnprocessableEntityException(
