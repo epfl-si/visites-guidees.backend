@@ -43,7 +43,7 @@ export class CreateReservationDto {
   @ApiProperty()
   @IsNumber()
   @IsNotEmpty()
-  zip!: number;
+  zip!: string;
 
   @ApiProperty()
   @IsString()

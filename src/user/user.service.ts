@@ -4,12 +4,12 @@ import { PrismaService } from '../prisma.service';
 
 @Injectable()
 export class UserService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   async FormatUserInfo(Req: ReqEntraOauthUser): Promise<UserInfo> {
-    const isGuide = await this.prisma.guideInfo.findUnique({
+    const guide = await this.prisma.guide.findUnique({
       where: {
-        sciper: Number(Req.uniqueid),
+        id: Number(Req.uniqueid),
       },
     });
 
@@ -20,7 +20,7 @@ export class UserService {
       lastName: Req.family_name,
       mail: Req.mail,
       isAdmin: Req.groups.includes('guided-tours-admin_AppGrpU'),
-      isGuide: isGuide ? true : false,
+      isGuide: guide ? true : false,
     };
     return data;
   }

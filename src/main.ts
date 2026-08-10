@@ -3,6 +3,7 @@ import { AppModule } from './app.module';
 import { WebpackHotModule } from './types/nestjs';
 import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 
 declare const module: WebpackHotModule;
 
@@ -10,6 +11,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   app.useGlobalPipes(new ValidationPipe());
+  app.useGlobalFilters(new HttpExceptionFilter());
 
   app.setGlobalPrefix('api');
 
@@ -51,3 +53,4 @@ async function bootstrap() {
 }
 
 void bootstrap();
+

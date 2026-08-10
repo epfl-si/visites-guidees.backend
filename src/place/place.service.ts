@@ -1,89 +1,116 @@
-import { Injectable } from '@nestjs/common';
-import { CreatePlaceDto } from './dto/create-place.dto';
-import { UpdatePlaceDto } from './dto/update-place.dto';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { Prisma } from '../../generated/prisma/client';
 import { PrismaService } from '../prisma.service';
-import {
-  NotFoundException,
-  InternalServerErrorException,
-} from '@nestjs/common';
-import {
-  ResponsePlaceDto,
-  ResponsePlaceWithoutLanguagesDto,
-} from './dto/response-place.dto';
+import { CreatePlaceDto } from './dto/create.dto';
+import { UpdatePlaceDto } from './dto/update.dto';
+import { ResponsePlaceDto, ResponsePlaceListDto } from './dto/response.dto';
+import { AppLogger as Logger } from '@/logger.service';
 
 @Injectable()
 export class PlaceService {
-  constructor(private prisma: PrismaService) {}
+  private readonly logger = new Logger(PlaceService.name);
 
-  async getPlaceInfo(): Promise<ResponsePlaceWithoutLanguagesDto[] | null> {
-    const places = await this.prisma.places.findMany();
+  constructor(private readonly prisma: PrismaService) { }
 
-    if (places.length == 0) {
-      throw new NotFoundException(`No place found `);
+  async list(): Promise<ResponsePlaceListDto[]> {
+    const places = await this.prisma.place.findMany();
+
+    if (places.length === 0) {
+      this.logger.warn('No place found');
+      throw new NotFoundException('No place found');
     }
 
-    return places as ResponsePlaceWithoutLanguagesDto[];
+    this.logger.log(`Listed ${places.length} place(s)`);
+    return places as ResponsePlaceListDto[];
   }
 
-  async getPlaceDetails(id: number): Promise<ResponsePlaceDto | null> {
-    const place = await this.prisma.places.findUnique({
+  async read(id: number): Promise<ResponsePlaceDto> {
+    const place = await this.prisma.place.findUnique({
       where: { id },
-      include: {
-        placeLanguages: {
-          include: {
-            language: true,
-          },
-        },
-      },
+      include: { languages: true },
     });
 
     if (!place) {
+      this.logger.warn(`No place found with id ${id}`);
       throw new NotFoundException(`No place found with id ${id}`);
     }
 
-    const { placeLanguages, ...placeWithoutLanguages } = place;
-
-    const languages = placeLanguages.map((pl) => ({
-      id: pl.language.id,
-      name: pl.language.name,
-    }));
-
-    if (languages.length === 0) {
-      throw new InternalServerErrorException(
-        `No languages found for place with id ${id}`,
-      );
+    if (place.languages.length === 0) {
+      this.logger.error(`Place ${id} has no associated languages`);
+      throw new Error(`Place ${id} has no associated languages`);
     }
 
-    return {
-      ...placeWithoutLanguages,
-      languages: languages,
-    } as ResponsePlaceDto;
+    this.logger.log(`Read place ${id}`);
+    return place as ResponsePlaceDto;
   }
 
-  create(createPlaceDto: CreatePlaceDto) {
-    return this.prisma.places.create({
+  async create(createPlaceDto: CreatePlaceDto): Promise<ResponsePlaceDto> {
+    const place = await this.prisma.place.create({
       data: {
         title: createPlaceDto.title,
         picture: createPlaceDto.picture,
         description: createPlaceDto.description,
-        maxPerGroup: createPlaceDto.maxPerGroup,
+        capacity: createPlaceDto.capacity,
         price: createPlaceDto.price,
         conditions: createPlaceDto.conditions,
-        placeLanguages: {
-          create: createPlaceDto.languageIds.map((languageId) => ({
-            languageId,
-          })),
+        languages: {
+          connect: createPlaceDto.languageIds.map((id) => ({ id })),
         },
       },
+      include: { languages: true },
     });
+
+    this.logger.log(`Created place ${place.id}`);
+    return place as ResponsePlaceDto;
   }
 
-  update(id: number, updatePlaceDto: UpdatePlaceDto) {
-    return this.prisma.places.update({
-      where: { id },
-      data: updatePlaceDto,
-    });
+  async update(
+    id: number,
+    updatePlaceDto: UpdatePlaceDto,
+  ): Promise<ResponsePlaceDto> {
+    const { languageIds, ...rest } = updatePlaceDto;
+
+    try {
+      const place = await this.prisma.place.update({
+        where: { id },
+        data: {
+          ...rest,
+          ...(languageIds && {
+            languages: {
+              set: languageIds.map((languageId) => ({ id: languageId })),
+            },
+          }),
+        },
+        include: { languages: true },
+      });
+
+      this.logger.log(`Updated place ${id}`);
+      return place as ResponsePlaceDto;
+    } catch (error) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2025'
+      ) {
+        this.logger.warn(`No place found with id ${id}`);
+        throw new NotFoundException(`No place found with id ${id}`);
+      }
+      throw error;
+    }
   }
 
-  // TODO : Implement the remove method to delete a place by its ID
+  async remove(id: number): Promise<void> {
+    try {
+      await this.prisma.place.delete({ where: { id } });
+      this.logger.log(`Removed place ${id}`);
+    } catch (error) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2025'
+      ) {
+        this.logger.warn(`No place found with id ${id}`);
+        throw new NotFoundException(`No place found with id ${id}`);
+      }
+      throw error;
+    }
+  }
 }

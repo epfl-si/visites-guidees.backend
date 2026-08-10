@@ -1,13 +1,13 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
-import { places, Prisma } from '../../generated/prisma/client';
+import { Place, Prisma } from '../../generated/prisma/client';
 import { UnprocessableEntityException } from '@nestjs/common';
 import Holidays from 'date-holidays';
 import { CreateReservationDto } from './dto/create-reservation.dto';
 
 @Injectable()
 export class ReservationService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
   private readonly optionalFields = [
     'company',
     'additionnalAddress',
@@ -16,8 +16,8 @@ export class ReservationService {
   ];
   private readonly holidays = new Holidays('CH', 'VD');
 
-  getToursInfo(): Promise<places[] | null> {
-    return this.prisma.places.findMany();
+  getToursInfo(): Promise<Place[] | null> {
+    return this.prisma.place.findMany();
   }
 
   isBusinessDay(date: Date): boolean {
@@ -54,14 +54,14 @@ export class ReservationService {
     }
     return businessDays >= 7;
   }
-  async createReservationInDB(data: Prisma.reservationsUncheckedCreateInput) {
-    return this.prisma.reservations.create({ data });
+  async createReservationInDB(data: Prisma.ReservationUncheckedCreateInput) {
+    return this.prisma.reservation.create({ data });
   }
 
   private mapToReservationCreateInput(
     content: CreateReservationDto,
-    visitDate: Date,
-  ): Prisma.reservationsUncheckedCreateInput {
+    date: Date,
+  ): Prisma.ReservationUncheckedCreateInput {
     return {
       firstName: content.firstName,
       lastName: content.lastName,
@@ -69,18 +69,18 @@ export class ReservationService {
       email: content.email,
       phone: content.phone,
       address: content.address,
-      additionnalAddress: content.additionnalAddress || null,
+      additionalAddress: content.additionnalAddress,
       city: content.city,
       region: content.region,
-      zip: Number(content.zip),
+      zip: content.zip,
       country: content.country,
-      visitDate,
-      numberOfParticipant: Number(content.numberOfParticipant),
+      date,
+      participantNumber: Number(content.numberOfParticipant),
       languageId: Number(content.languageId),
       placeId: Number(content.placeId),
-      comments: content.comments || null,
+      comment: content.comments || null,
       payment: '',
-      statusId: 1,
+      status: 'WAITINGGUIDE',
     };
   }
 
@@ -121,7 +121,7 @@ export class ReservationService {
   }
 
   async getLastReservations() {
-    const lastReservations = await this.prisma.reservations.findMany({
+    const lastReservations = await this.prisma.reservation.findMany({
       select: {
         id: true,
         company: true,

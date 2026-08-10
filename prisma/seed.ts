@@ -10,33 +10,31 @@ const prisma = new PrismaClient({ adapter });
 async function main() {
   // ============================================
   // CLEANUP (reverse dependency order)
-  // Note: on ne touche pas à la table `status`,
-  // elle est supposée déjà peuplée.
+  // Les tables de jointure implicites (Guide<->Language,
+  // Place<->Language, BlockedPeriod<->Place, BlockedPeriod<->Guide)
+  // sont nettoyées automatiquement par Prisma quand on supprime
+  // les enregistrements des tables principales.
   // ============================================
   await prisma.reservationGuide.deleteMany();
-  await prisma.blockedPeriodGuide.deleteMany();
-  await prisma.blockedPeriodPlace.deleteMany();
-  await prisma.placeLanguage.deleteMany();
-  await prisma.guideLanguage.deleteMany();
-  await prisma.guideInfo.deleteMany();
-  await prisma.users.deleteMany();
-  await prisma.reservations.deleteMany();
-  await prisma.places.deleteMany();
-  await prisma.blockedPeriods.deleteMany();
-  await prisma.languages.deleteMany();
+  await prisma.reservation.deleteMany();
+  await prisma.guide.deleteMany();
+  await prisma.blockedPeriod.deleteMany();
+  await prisma.user.deleteMany();
+  await prisma.place.deleteMany();
+  await prisma.language.deleteMany();
 
   // ============================================
   // LANGUAGES
   // ============================================
-  const languages = [
-    { id: 1, name: 'Français' },
-    { id: 2, name: 'English' },
-    { id: 3, name: 'Deutsch' },
-    { id: 4, name: 'Italiano' },
-    { id: 5, name: 'Español' },
-    { id: 6, name: 'Português' },
+  const languagesData = [
+    { id: 1, code: 'fr', name: 'Français' },
+    { id: 2, code: 'en', name: 'English' },
+    { id: 3, code: 'de', name: 'Deutsch' },
+    { id: 4, code: 'it', name: 'Italiano' },
+    { id: 5, code: 'es', name: 'Español' },
+    { id: 6, code: 'pt', name: 'Português' },
   ];
-  await prisma.languages.createMany({ data: languages });
+  await prisma.language.createMany({ data: languagesData });
 
   // ============================================
   // PLACES
@@ -47,7 +45,7 @@ async function main() {
       title: { fr: 'Campus EPFL (Standard)', en: 'EPFL Campus (Standard)' },
       picture: 'https://www.epfl.ch/campus/visitors/wp-content/uploads/2019/04/campus_rolex.jpg',
       description: { fr: 'Visite guidée générale du campus', en: 'General guided tour of the campus' },
-      maxPerGroup: 20,
+      capacity: 20,
       price: 150,
       conditions: { fr: 'Bonnes chaussures recommandées', en: 'Good shoes recommended' },
       languageIds: [1, 2, 3],
@@ -57,7 +55,7 @@ async function main() {
       title: { fr: 'Visite Architecture', en: 'Architecture Tour' },
       picture: 'https://www.epfl.ch/campus/visitors/wp-content/uploads/2019/04/artlab.jpg',
       description: { fr: 'Découverte des bâtiments emblématiques', en: 'Discovery of iconic buildings' },
-      maxPerGroup: 15,
+      capacity: 15,
       price: 200,
       conditions: { fr: 'Aucune condition particulière', en: 'No special conditions' },
       languageIds: [1, 2],
@@ -67,7 +65,7 @@ async function main() {
       title: { fr: 'Rolex Learning Center', en: 'Rolex Learning Center' },
       picture: 'https://www.epfl.ch/campus/visitors/wp-content/uploads/2019/04/rolex-learning-center.jpg',
       description: { fr: 'Visite du bâtiment emblématique et de sa bibliothèque', en: 'Tour of the iconic building and its library' },
-      maxPerGroup: 25,
+      capacity: 25,
       price: 100,
       conditions: { fr: "Silence requis à l'intérieur", en: 'Silence required inside' },
       languageIds: [1, 2, 3, 4],
@@ -77,9 +75,9 @@ async function main() {
       title: { fr: 'Laboratoires de recherche', en: 'Research Labs' },
       picture: 'https://www.epfl.ch/campus/visitors/wp-content/uploads/2019/04/labs.jpg',
       description: { fr: 'Découverte des laboratoires de pointe', en: 'Discovery of cutting-edge research labs' },
-      maxPerGroup: 12,
+      capacity: 12,
       price: 250,
-      conditions: { fr: "Accès réservé aux plus de 16 ans", en: 'Access restricted to 16+' },
+      conditions: { fr: 'Accès réservé aux plus de 16 ans', en: 'Access restricted to 16+' },
       languageIds: [1, 2],
     },
     {
@@ -87,7 +85,7 @@ async function main() {
       title: { fr: 'ArtLab', en: 'ArtLab' },
       picture: 'https://www.epfl.ch/campus/visitors/wp-content/uploads/2019/04/artlab2.jpg',
       description: { fr: 'Visite du centre culturel et artistique', en: 'Tour of the cultural and art center' },
-      maxPerGroup: 30,
+      capacity: 30,
       price: 120,
       conditions: { fr: 'Aucune condition particulière', en: 'No special conditions' },
       languageIds: [1, 2, 3, 4, 5],
@@ -97,7 +95,7 @@ async function main() {
       title: { fr: 'Visite nocturne du campus', en: 'Night Campus Tour' },
       picture: 'https://www.epfl.ch/campus/visitors/wp-content/uploads/2019/04/campus-night.jpg',
       description: { fr: 'Découverte du campus illuminé en soirée', en: 'Discovery of the illuminated campus at night' },
-      maxPerGroup: 18,
+      capacity: 18,
       price: 180,
       conditions: { fr: 'Vêtements chauds conseillés', en: 'Warm clothing recommended' },
       languageIds: [1, 2],
@@ -106,12 +104,11 @@ async function main() {
 
   for (const place of placesData) {
     const { languageIds, ...data } = place;
-    await prisma.places.create({
+    await prisma.place.create({
       data: {
         ...data,
-        createdAt: new Date(),
-        placeLanguages: {
-          create: languageIds.map(id => ({ languageId: id })),
+        languages: {
+          connect: languageIds.map((id) => ({ id })),
         },
       },
     });
@@ -119,133 +116,141 @@ async function main() {
 
   // ============================================
   // BLOCKED PERIODS (données préparées ici pour pouvoir
-  // calculer le compteur `blockedPeriods` de chaque guide)
+  // référencer les guides et places une fois créés plus bas)
   // ============================================
   const currentYear = new Date().getFullYear();
 
   const blockedPeriodsData = [
     {
-      label: "Fermeture de fin d'année",
-      startDatetime: new Date(currentYear, 11, 24),
-      endDatetime: new Date(currentYear + 1, 0, 3),
+      label: { fr: "Fermeture de fin d'année", en: 'Year-end closure' },
+      start: new Date(currentYear, 11, 24),
+      end: new Date(currentYear + 1, 0, 3),
       placeIds: [1, 2, 3, 4, 5, 6],
-      guideScipers: [111111, 222222, 333333, 444444, 555555, 666666],
+      guideIds: [111111, 222222, 333333, 444444, 555555, 666666],
     },
     {
-      label: 'Maintenance Rolex Learning Center',
-      startDatetime: new Date(currentYear, 2, 10),
-      endDatetime: new Date(currentYear, 2, 14),
+      label: { fr: 'Maintenance Rolex Learning Center', en: 'Rolex Learning Center maintenance' },
+      start: new Date(currentYear, 2, 10),
+      end: new Date(currentYear, 2, 14),
       placeIds: [3],
-      guideScipers: [],
+      guideIds: [],
     },
     {
-      label: 'Vacances académiques été',
-      startDatetime: new Date(currentYear, 6, 15),
-      endDatetime: new Date(currentYear, 7, 15),
+      label: { fr: 'Vacances académiques été', en: 'Summer academic break' },
+      start: new Date(currentYear, 6, 15),
+      end: new Date(currentYear, 7, 15),
       placeIds: [4],
-      guideScipers: [444444, 666666],
+      guideIds: [444444, 666666],
     },
     {
-      label: 'Indisponibilité guide - congé',
-      startDatetime: new Date(currentYear, 4, 1),
-      endDatetime: new Date(currentYear, 4, 10),
+      label: { fr: 'Indisponibilité guide - congé', en: 'Guide unavailability - leave' },
+      start: new Date(currentYear, 4, 1),
+      end: new Date(currentYear, 4, 10),
       placeIds: [],
-      guideScipers: [222222],
+      guideIds: [222222],
     },
   ];
 
   // ============================================
-  // GUIDE INFO & USERS
+  // USERS & GUIDES
+  // Guide.id partage la clé primaire de User.id, donc on
+  // crée le User d'abord, puis le Guide avec le même id.
   // ============================================
   const guidesData = [
     {
-      sciper: 111111,
-      statusId: 2,
+      id: 111111,
+      status: 'ACTIVE' as const,
+      phone: ['+41 21 693 11 11'],
       languageIds: [1, 2],
       user: {
         firstName: 'Alice',
         lastName: 'Martin',
         email: 'alice.martin@epfl.ch',
-        gaspar: 'amartin',
+        username: 'amartin',
       },
     },
     {
-      sciper: 222222,
-      statusId: 2,
+      id: 222222,
+      status: 'ACTIVE' as const,
+      phone: ['+41 21 693 22 22'],
       languageIds: [1, 2, 3],
       user: {
         firstName: 'Bob',
         lastName: 'Dupont',
         email: 'bob.dupont@epfl.ch',
-        gaspar: 'bdupont',
+        username: 'bdupont',
       },
     },
     {
-      sciper: 333333,
-      statusId: 2,
+      id: 333333,
+      status: 'ACTIVE' as const,
+      phone: ['+41 21 693 33 33'],
       languageIds: [1, 4],
       user: {
         firstName: 'Chiara',
         lastName: 'Rossi',
         email: 'chiara.rossi@epfl.ch',
-        gaspar: 'crossi',
+        username: 'crossi',
       },
     },
     {
-      sciper: 444444,
-      statusId: 1,
+      id: 444444,
+      status: 'INACTIVE' as const,
+      phone: ['+41 21 693 44 44'],
       languageIds: [1, 2, 5],
       user: {
         firstName: 'David',
         lastName: 'Fernandez',
         email: 'david.fernandez@epfl.ch',
-        gaspar: 'dfernandez',
+        username: 'dfernandez',
       },
     },
     {
-      sciper: 555555,
-      statusId: 2,
+      id: 555555,
+      status: 'ACTIVE' as const,
+      phone: ['+41 21 693 55 55'],
       languageIds: [2, 3],
       user: {
         firstName: 'Emma',
         lastName: 'Müller',
         email: 'emma.muller@epfl.ch',
-        gaspar: 'emuller',
+        username: 'emuller',
       },
     },
     {
-      sciper: 666666,
-      statusId: 1,
+      id: 666666,
+      status: 'RETIRED' as const,
+      phone: ['+41 21 693 66 66'],
       languageIds: [1, 2, 3, 4, 5, 6],
       user: {
         firstName: 'Fabio',
         lastName: 'Pereira',
         email: 'fabio.pereira@epfl.ch',
-        gaspar: 'fpereira',
+        username: 'fpereira',
       },
     },
   ];
 
   for (const guide of guidesData) {
-    const { languageIds, user, ...data } = guide;
+    const { languageIds, user, id, status, phone } = guide;
 
-    // Le sciper est la clé partagée entre Users et guideInfo :
-    // on doit créer le Users d'abord (contrainte de clé étrangère).
-    await prisma.users.create({
+    await prisma.user.create({
       data: {
-        sciper: data.sciper,
+        id,
         firstName: user.firstName,
         lastName: user.lastName,
         email: user.email,
-        gaspar: user.gaspar,
+        username: user.username,
       },
     });
 
-    await prisma.guideInfo.create({
+    await prisma.guide.create({
       data: {
-        ...data,
-        guideLanguages: {
-          create: languageIds.map((id) => ({ languageId: id })),
+        id,
+        status,
+        phone,
+        languages: {
+          connect: languageIds.map((langId) => ({ id: langId })),
         },
       },
     });
@@ -255,16 +260,15 @@ async function main() {
   // CRÉATION DES BLOCKED PERIODS
   // ============================================
   for (const period of blockedPeriodsData) {
-    const { placeIds, guideScipers, ...data } = period;
-    await prisma.blockedPeriods.create({
+    const { placeIds, guideIds, ...data } = period;
+    await prisma.blockedPeriod.create({
       data: {
         ...data,
-        createdAt: new Date(),
-        blockedPeriodPlaces: {
-          create: placeIds.map((placeId) => ({ placeId })),
+        places: {
+          connect: placeIds.map((placeId) => ({ id: placeId })),
         },
-        blockedPeriodGuides: {
-          create: guideScipers.map((guideSciper) => ({ guideSciper })),
+        guides: {
+          connect: guideIds.map((guideId) => ({ id: guideId })),
         },
       },
     });
@@ -288,19 +292,20 @@ async function main() {
       email: 'jean.rousseau@example.com',
       phone: '+41 21 000 00 00',
       address: 'Rue de la Cité 1',
-      additionnalAddress: null,
+      additionalAddress: null,
       city: 'Lausanne',
-      zip: 1005,
+      zip: '1005',
       region: 'Vaud',
       country: 'Suisse',
-      visitDate: inDays(14),
+      date: inDays(14),
       payment: 'Facture',
-      numberOfParticipant: 25,
-      statusId: 7,
+      participantNumber: 25,
+      status: 'READY' as const,
       languageId: 1,
       placeId: 1,
-      comments: 'Classe de maturité scientifique',
-      guideSciper: 111111,
+      comment: 'Classe de maturité scientifique',
+      guideId: 111111,
+      guideStatus: 'ACCEPTED' as const,
     },
     {
       id: 2,
@@ -310,19 +315,20 @@ async function main() {
       email: 'john.smith@techcorp.com',
       phone: '+44 7700 900000',
       address: '10 Innovation Way',
-      additionnalAddress: 'Floor 3',
+      additionalAddress: 'Floor 3',
       city: 'London',
-      zip: 12345,
+      zip: '12345',
       region: 'Greater London',
       country: 'UK',
-      visitDate: inDays(14),
+      date: inDays(14),
       payment: 'Sur place (Carte)',
-      numberOfParticipant: 10,
-      statusId: 6,
+      participantNumber: 10,
+      status: 'WAITINGGUIDE' as const,
       languageId: 2,
       placeId: 2,
-      comments: null,
-      guideSciper: null,
+      comment: null,
+      guideId: null,
+      guideStatus: null,
     },
     {
       id: 3,
@@ -332,19 +338,20 @@ async function main() {
       email: 'maria.gonzalez@example.com',
       phone: '+34 600 000 000',
       address: 'Calle Mayor 5',
-      additionnalAddress: null,
+      additionalAddress: null,
       city: 'Madrid',
-      zip: 28001,
+      zip: '28001',
       region: 'Madrid',
       country: 'Espagne',
-      visitDate: inDays(30),
+      date: inDays(30),
       payment: 'Sur place (Espèces)',
-      numberOfParticipant: 4,
-      statusId: 6,
+      participantNumber: 4,
+      status: 'WAITINGVALIDATION' as const,
       languageId: 5,
       placeId: 5,
-      comments: 'Visite en famille',
-      guideSciper: 444444,
+      comment: 'Visite en famille',
+      guideId: 444444,
+      guideStatus: 'WAITING' as const,
     },
     {
       id: 4,
@@ -354,19 +361,20 @@ async function main() {
       email: 'hans.weber@uzh.ch',
       phone: '+41 44 000 00 00',
       address: 'Rämistrasse 71',
-      additionnalAddress: null,
+      additionalAddress: null,
       city: 'Zürich',
-      zip: 8006,
+      zip: '8006',
       region: 'Zürich',
       country: 'Suisse',
-      visitDate: inDays(21),
+      date: inDays(21),
       payment: 'Facture',
-      numberOfParticipant: 18,
-      statusId: 7,
+      participantNumber: 18,
+      status: 'READY' as const,
       languageId: 3,
       placeId: 3,
-      comments: "Groupe d'étudiants en architecture",
-      guideSciper: 555555,
+      comment: "Groupe d'étudiants en architecture",
+      guideId: 555555,
+      guideStatus: 'ACCEPTED' as const,
     },
     {
       id: 5,
@@ -376,19 +384,20 @@ async function main() {
       email: 'luigi.bianchi@polimi.it',
       phone: '+39 02 0000 0000',
       address: 'Piazza Leonardo da Vinci 32',
-      additionnalAddress: null,
+      additionalAddress: null,
       city: 'Milano',
-      zip: 20133,
+      zip: '20133',
       region: 'Lombardia',
       country: 'Italie',
-      visitDate: inDays(45),
+      date: inDays(45),
       payment: 'Facture',
-      numberOfParticipant: 30,
-      statusId: 6,
+      participantNumber: 30,
+      status: 'WAITINGGUIDE' as const,
       languageId: 4,
       placeId: 3,
-      comments: null,
-      guideSciper: null,
+      comment: null,
+      guideId: null,
+      guideStatus: null,
     },
     {
       id: 6,
@@ -398,19 +407,20 @@ async function main() {
       email: 'sophie.lambert@example.com',
       phone: '+33 6 00 00 00 00',
       address: '12 Rue de la Paix',
-      additionnalAddress: 'Appartement 4',
+      additionalAddress: 'Appartement 4',
       city: 'Paris',
-      zip: 75002,
+      zip: '75002',
       region: 'Île-de-France',
       country: 'France',
-      visitDate: inDays(7),
+      date: inDays(7),
       payment: 'Sur place (Carte)',
-      numberOfParticipant: 2,
-      statusId: 6,
+      participantNumber: 2,
+      status: 'WAITINGVALIDATION' as const,
       languageId: 1,
       placeId: 6,
-      comments: 'Visite en couple',
-      guideSciper: 222222,
+      comment: 'Visite en couple',
+      guideId: 222222,
+      guideStatus: 'WAITING' as const,
     },
     {
       id: 7,
@@ -420,19 +430,20 @@ async function main() {
       email: 'anna.kowalski@lycee.edu',
       phone: '+48 22 000 00 00',
       address: 'ul. Marszałkowska 1',
-      additionnalAddress: null,
+      additionalAddress: null,
       city: 'Warszawa',
-      zip: 1,
+      zip: '00-001',
       region: 'Mazowieckie',
       country: 'Pologne',
-      visitDate: inDays(60),
+      date: inDays(60),
       payment: 'Facture',
-      numberOfParticipant: 22,
-      statusId: 6,
+      participantNumber: 22,
+      status: 'WAITINGGUIDE' as const,
       languageId: 2,
       placeId: 1,
-      comments: 'Échange scolaire',
-      guideSciper: null,
+      comment: 'Échange scolaire',
+      guideId: null,
+      guideStatus: null,
     },
     {
       id: 8,
@@ -442,19 +453,20 @@ async function main() {
       email: 'pedro.alves@example.com',
       phone: '+351 91 000 00 00',
       address: 'Rua Augusta 100',
-      additionnalAddress: null,
+      additionalAddress: null,
       city: 'Lisboa',
-      zip: 1100,
+      zip: '1100',
       region: 'Lisboa',
       country: 'Portugal',
-      visitDate: inDays(-10),
+      date: inDays(-10),
       payment: 'Sur place (Carte)',
-      numberOfParticipant: 6,
-      statusId: 6,
+      participantNumber: 6,
+      status: 'READY' as const,
       languageId: 6,
       placeId: 4,
-      comments: 'Visite déjà effectuée',
-      guideSciper: 666666,
+      comment: 'Visite déjà effectuée',
+      guideId: 666666,
+      guideStatus: 'ACCEPTED' as const,
     },
     {
       id: 9,
@@ -464,19 +476,20 @@ async function main() {
       email: 'emily.clark@mit.edu',
       phone: '+1 617 000 0000',
       address: '77 Massachusetts Ave',
-      additionnalAddress: null,
+      additionalAddress: null,
       city: 'Cambridge',
-      zip: 2139,
+      zip: '02139',
       region: 'MA',
       country: 'USA',
-      visitDate: inDays(90),
+      date: inDays(90),
       payment: 'Facture',
-      numberOfParticipant: 15,
-      statusId: 7,
+      participantNumber: 15,
+      status: 'READY' as const,
       languageId: 2,
       placeId: 4,
-      comments: 'Délégation académique',
-      guideSciper: 555555,
+      comment: 'Délégation académique',
+      guideId: 555555,
+      guideStatus: 'ACCEPTED' as const,
     },
     {
       id: 10,
@@ -486,19 +499,20 @@ async function main() {
       email: 'lucas.bernard@example.com',
       phone: '+41 79 000 00 00',
       address: 'Avenue de la Gare 3',
-      additionnalAddress: null,
+      additionalAddress: null,
       city: 'Genève',
-      zip: 1201,
+      zip: '1201',
       region: 'Genève',
       country: 'Suisse',
-      visitDate: inDays(3),
+      date: inDays(3),
       payment: 'Sur place (Espèces)',
-      numberOfParticipant: 1,
-      statusId: 6,
+      participantNumber: 1,
+      status: 'WAITINGGUIDE' as const,
       languageId: 1,
       placeId: 5,
-      comments: null,
-      guideSciper: null,
+      comment: null,
+      guideId: null,
+      guideStatus: null,
     },
     {
       id: 11,
@@ -508,19 +522,20 @@ async function main() {
       email: 'yuki.tanaka@titech.ac.jp',
       phone: '+81 3 0000 0000',
       address: '2 Chome-12-1 Ōokayama',
-      additionnalAddress: null,
+      additionalAddress: null,
       city: 'Tokyo',
-      zip: 1528,
+      zip: '152-8550',
       region: 'Tokyo',
       country: 'Japon',
-      visitDate: inDays(120),
+      date: inDays(120),
       payment: 'Facture',
-      numberOfParticipant: 20,
-      statusId: 7,
+      participantNumber: 20,
+      status: 'WAITINGPAYMENT' as const,
       languageId: 2,
       placeId: 3,
-      comments: 'Partenariat de recherche',
-      guideSciper: null,
+      comment: 'Partenariat de recherche',
+      guideId: null,
+      guideStatus: null,
     },
     {
       id: 12,
@@ -530,46 +545,46 @@ async function main() {
       email: 'chloe.favre@gymnyon.ch',
       phone: '+41 22 000 00 00',
       address: 'Route de Divonne 8',
-      additionnalAddress: null,
+      additionalAddress: null,
       city: 'Nyon',
-      zip: 1260,
+      zip: '1260',
       region: 'Vaud',
       country: 'Suisse',
-      visitDate: inDays(-25),
+      date: inDays(-25),
       payment: 'Facture',
-      numberOfParticipant: 28,
-      statusId: 7,
+      participantNumber: 28,
+      status: 'CANCELLED' as const,
       languageId: 1,
       placeId: 1,
-      comments: 'Visite annulée pour cause de grève',
-      guideSciper: 111111,
+      comment: 'Visite annulée pour cause de grève',
+      guideId: 111111,
+      guideStatus: 'DECLINED' as const,
     },
   ];
 
   for (const res of reservationsData) {
-    const { guideSciper, ...data } = res;
+    const { guideId, guideStatus, ...data } = res;
 
-    await prisma.reservations.create({
+    await prisma.reservation.create({
       data: {
         ...data,
-        createdAt: new Date(),
-        ...(guideSciper
+        ...(guideId
           ? {
-              reservationGuide: {
-                create: {
-                  guideSciper: guideSciper,
-                  statusId: 2, // Confirmé pour le guide
-                  updatedAt: new Date(),
-                },
+            reservationGuides: {
+              create: {
+                guideId,
+                status: guideStatus ?? 'WAITING',
+                updatedAt: new Date(),
               },
-            }
+            },
+          }
           : {}),
       },
     });
   }
 
   console.log(
-    'Seeding completed successfully: Languages, Places, Guides, Users, BlockedPeriods, Reservations'
+    'Seeding completed successfully: Languages, Places, Users, Guides, BlockedPeriods, Reservations'
   );
 }
 

@@ -1,16 +1,19 @@
 import {
-  IsString,
-  IsNumber,
-  IsNotEmpty,
-  IsObject,
   IsArray,
+  IsNotEmpty,
+  IsNumber,
+  IsObject,
+  IsString,
   Min,
   ValidateNested,
 } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, OmitType } from '@nestjs/swagger';
 import { LanguageDto } from '../../language/dto/language.dto';
-import { OmitType } from '@nestjs/swagger';
+
 export class ResponsePlaceDto {
+  @ApiProperty()
+  id!: number;
+
   @ApiProperty({
     type: 'object',
     additionalProperties: true,
@@ -29,7 +32,7 @@ export class ResponsePlaceDto {
     additionalProperties: true,
     example: {
       en: 'A House near the beach',
-      fr: 'Une maison à coté de la plages',
+      fr: 'Une maison à coté de la plage',
     },
   })
   @IsObject()
@@ -38,7 +41,7 @@ export class ResponsePlaceDto {
   @ApiProperty()
   @IsNumber()
   @Min(1)
-  maxPerGroup!: number;
+  capacity!: number;
 
   @ApiProperty()
   @IsNumber()
@@ -57,12 +60,17 @@ export class ResponsePlaceDto {
   conditions!: Record<string, string>;
 
   @ApiProperty()
+  createdAt!: Date;
+
+  @ApiProperty()
+  updatedAt!: Date;
+
+  @ApiProperty({ type: [LanguageDto] })
   @IsArray()
   @ValidateNested({ each: true })
   languages!: LanguageDto[];
 }
 
-export class ResponsePlaceWithoutLanguagesDto extends OmitType(
-  ResponsePlaceDto,
-  ['languages'] as const,
-) {}
+export class ResponsePlaceListDto extends OmitType(ResponsePlaceDto, [
+  'languages',
+] as const) { }
