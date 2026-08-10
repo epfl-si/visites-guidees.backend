@@ -4,7 +4,7 @@ import { PrismaService } from '../prisma.service';
 
 @Injectable()
 export class UserService {
-  constructor(private prisma: PrismaService) { }
+  constructor(private prisma: PrismaService) {}
 
   async FormatUserInfo(Req: ReqEntraOauthUser): Promise<UserInfo> {
     const guide = await this.prisma.guide.findUnique({

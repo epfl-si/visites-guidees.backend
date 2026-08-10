@@ -1,7 +1,6 @@
 import { IsNumber, IsString, IsOptional, IsBoolean } from 'class-validator';
 
 export class ResponseUserDto {
-
   @IsString()
   firstName!: string;
 
@@ -20,18 +19,15 @@ export class ResponseUserDto {
 
   @IsBoolean()
   isAdmin!: boolean;
-
 }
 
 export class ResponseUserSearch {
-
   @IsNumber()
-  sciper!: number
+  sciper!: number;
 
   @IsString()
   firstName!: string;
 
   @IsString()
   lastName!: string;
-
 }
