@@ -1,10 +1,9 @@
-import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+import { MiddlewareConsumer, Module } from '@nestjs/common';
 import { PassportModule } from '@nestjs/passport';
 import { ConfigModule } from '@nestjs/config';
 import { ReservationModule } from './reservation/reservation.module';
 import { UserModule } from './user/user.module';
 import { PlaceModule } from './place/place.module';
-import { GuideModule } from './guide/guide.module';
 import { RequestIdMiddleware } from './common/middleware/request-id.middleware';
 
 @Module({
@@ -14,7 +13,6 @@ import { RequestIdMiddleware } from './common/middleware/request-id.middleware';
     ReservationModule,
     UserModule,
     PlaceModule,
-    GuideModule
   ],
   controllers: [],
   providers: [],
