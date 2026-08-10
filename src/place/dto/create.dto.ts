@@ -1,10 +1,4 @@
-import {
-  IsString,
-  IsNumber,
-  IsNotEmpty,
-  IsArray,
-  Min,
-} from 'class-validator';
+import { IsString, IsNumber, IsNotEmpty, IsArray, Min } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { IsLocalizedText } from '../../common/validators/is-localized-text.validator';
 import type { LocalizedText } from '../../common/types/localized-text.type';

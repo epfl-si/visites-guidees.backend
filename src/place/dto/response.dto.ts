@@ -73,4 +73,4 @@ export class ResponsePlaceDto {
 
 export class ResponsePlaceListDto extends OmitType(ResponsePlaceDto, [
   'languages',
-] as const) { }
+] as const) {}
