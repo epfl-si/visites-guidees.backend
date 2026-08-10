@@ -1,13 +1,22 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
 import { Place, Prisma } from '../../generated/prisma/client';
 import { UnprocessableEntityException } from '@nestjs/common';
 import Holidays from 'date-holidays';
-import { CreateReservationDto } from './dto/create-reservation.dto';
+import { CreateReservationDto } from './dto/create.dto';
+import { UpdateReservationDto } from './dto/update.dto';
+import { ResponseReservationDto } from './dto/response.dto';
+import { AppLogger as Logger } from '@/logger.service';
 
 @Injectable()
 export class ReservationService {
-  constructor(private prisma: PrismaService) { }
+  private readonly logger = new Logger(ReservationService.name);
+
+  constructor(private prisma: PrismaService) {}
   private readonly optionalFields = [
     'company',
     'additionnalAddress',
@@ -136,5 +145,71 @@ export class ReservationService {
     });
 
     return lastReservations;
+  }
+
+  async list(): Promise<ResponseReservationDto[]> {
+    const reservations = await this.prisma.reservation.findMany();
+
+    if (reservations.length === 0) {
+      this.logger.warn('No reservation found');
+      throw new NotFoundException('No reservation found');
+    }
+
+    this.logger.log(`Listed ${reservations.length} reservation(s)`);
+    return reservations;
+  }
+
+  async read(id: number): Promise<ResponseReservationDto> {
+    const reservation = await this.prisma.reservation.findUnique({
+      where: { id },
+    });
+
+    if (!reservation) {
+      this.logger.warn(`No reservation found with id ${id}`);
+      throw new NotFoundException(`No reservation found with id ${id}`);
+    }
+
+    this.logger.log(`Read reservation ${id}`);
+    return reservation;
+  }
+
+  async update(
+    id: number,
+    updateReservationDto: UpdateReservationDto,
+  ): Promise<ResponseReservationDto> {
+    try {
+      const reservation = await this.prisma.reservation.update({
+        where: { id },
+        data: updateReservationDto,
+      });
+
+      this.logger.log(`Updated reservation ${id}`);
+      return reservation;
+    } catch (error) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2025'
+      ) {
+        this.logger.warn(`No reservation found with id ${id}`);
+        throw new NotFoundException(`No reservation found with id ${id}`);
+      }
+      throw error;
+    }
+  }
+
+  async remove(id: number): Promise<void> {
+    try {
+      await this.prisma.reservation.delete({ where: { id } });
+      this.logger.log(`Removed reservation ${id}`);
+    } catch (error) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2025'
+      ) {
+        this.logger.warn(`No reservation found with id ${id}`);
+        throw new NotFoundException(`No reservation found with id ${id}`);
+      }
+      throw error;
+    }
   }
 }
