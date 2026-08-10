@@ -7,8 +7,8 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { Response, Request } from 'express';
-import { randomUUID } from 'crypto';
-import { ApiError } from 'src/common/interfaces/response.interface';
+import { ApiError } from '@/common/interfaces/response.interface';
+import { getRequestId } from '@/common/context/request.context';
 
 interface HttpExceptionBody {
   message?: string | string[];
@@ -38,7 +38,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
       return;
     }
 
-    const requestId = request.requestId;
+    const requestId = getRequestId() ?? 'unknown';
 
     const isHttpException = exception instanceof HttpException;
     const code = isHttpException
