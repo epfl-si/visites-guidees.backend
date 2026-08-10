@@ -20,9 +20,9 @@ import { AzureAdGuard } from '../auth/azure-ad-auth.guard';
 import { GroupsGuard } from '../guards/groups.guard';
 import { RequireGroups } from '../decorators/require-groups.decorator';
 
-@Controller('place')
+@Controller({ path: 'places', version: '1' })
 export class PlaceController {
-  constructor(private readonly placeService: PlaceService) { }
+  constructor(private readonly placeService: PlaceService) {}
 
   @Get()
   @ApiResponse({ type: [ResponsePlaceListDto] })
