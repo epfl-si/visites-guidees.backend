@@ -13,8 +13,6 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe());
   app.useGlobalFilters(new HttpExceptionFilter());
 
-  app.setGlobalPrefix('api');
-
   const config = new DocumentBuilder()
     .setTitle('Guided Tours API')
     .setDescription('API documentation for the Guided Tours application')
