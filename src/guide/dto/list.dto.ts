@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
   IsArray,
+  IsDate,
   IsEnum,
   IsNumber,
   IsString,
@@ -9,7 +10,7 @@ import {
 import { GuideStatus } from '../../../generated/prisma/client';
 import { LanguageDto } from '../../language/dto/language.dto';
 
-export class ResponseGuideDto {
+export class GuideUserDto {
   @ApiProperty()
   @IsNumber()
   id!: number;
@@ -30,17 +31,35 @@ export class ResponseGuideDto {
   @IsString()
   username!: string;
 
-  @ApiProperty({ type: [String] })
-  @IsArray()
-  @IsString({ each: true })
-  phone!: string[];
+  @ApiProperty()
+  @IsDate()
+  createdAt!: Date;
+
+  @ApiProperty()
+  @IsDate()
+  updatedAt!: Date;
+}
+
+export class ListGuideDto {
+  @ApiProperty()
+  @IsNumber()
+  id!: number;
 
   @ApiProperty({ enum: GuideStatus })
   @IsEnum(GuideStatus)
   status!: GuideStatus;
 
+  @ApiProperty({ type: [String] })
+  @IsArray()
+  @IsString({ each: true })
+  phone!: string[];
+
   @ApiProperty({ type: [LanguageDto] })
   @IsArray()
   @ValidateNested({ each: true })
   languages!: LanguageDto[];
+
+  @ApiProperty({ type: GuideUserDto })
+  @ValidateNested()
+  user!: GuideUserDto;
 }
