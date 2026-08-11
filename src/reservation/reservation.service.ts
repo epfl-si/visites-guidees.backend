@@ -59,48 +59,37 @@ export class ReservationService {
   async create(
     createReservationDto: CreateReservationDto,
   ): Promise<ReadReservationDto> {
-    if (!createReservationDto.gdprConsent) {
+    const { gdprConsent, date, region, ...rest } = createReservationDto;
+
+    if (!gdprConsent) {
       throw new UnprocessableEntityException('GDPR consent must be accepted.');
     }
 
     const language = await this.prisma.language.findUnique({
-      where: { id: createReservationDto.languageId },
+      where: { id: rest.languageId },
     });
 
     if (!language) {
-      const message = `No language found with id ${createReservationDto.languageId}`;
+      const message = `No language found with id ${rest.languageId}`;
       this.logger.warn(message);
       throw new NotFoundException(message);
     }
 
     const place = await this.prisma.place.findUnique({
-      where: { id: createReservationDto.placeId },
+      where: { id: rest.placeId },
     });
 
     if (!place) {
-      const message = `No place found with id ${createReservationDto.placeId}`;
+      const message = `No place found with id ${rest.placeId}`;
       this.logger.warn(message);
       throw new NotFoundException(message);
     }
 
     const reservation = await this.prisma.reservation.create({
       data: {
-        firstName: createReservationDto.firstName,
-        lastName: createReservationDto.lastName,
-        company: createReservationDto.company,
-        email: createReservationDto.email,
-        phone: createReservationDto.phone,
-        address: createReservationDto.address,
-        additionalAddress: createReservationDto.additionalAddress,
-        city: createReservationDto.city,
-        zip: createReservationDto.zip,
-        region: createReservationDto.region ?? '',
-        country: createReservationDto.country,
-        date: new Date(createReservationDto.date),
-        participantNumber: createReservationDto.participantNumber,
-        languageId: createReservationDto.languageId,
-        placeId: createReservationDto.placeId,
-        comment: createReservationDto.comment,
+        ...rest,
+        region: region ?? '',
+        date: new Date(date),
         payment: '',
         status: 'WAITINGGUIDE',
       },
