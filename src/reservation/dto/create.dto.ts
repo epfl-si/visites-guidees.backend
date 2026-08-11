@@ -42,7 +42,7 @@ export class CreateReservationDto {
   @ApiProperty({ required: false })
   @IsOptional()
   @IsString()
-  additionnalAddress?: string;
+  additionalAddress?: string;
 
   @ApiProperty()
   @IsString()
