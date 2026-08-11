@@ -25,7 +25,8 @@ export class GuideController {
 
   @Get()
   @ApiResponse({ type: [ListGuideDto] })
-  @UseGuards(AzureAdGuard)
+  @UseGuards(AzureAdGuard, GroupsGuard)
+  @RequireGroups('visites-guidees-admins_AppGrpU')
   @ApiBearerAuth('access-token')
   list(): Promise<ListGuideDto[]> {
     return this.guideService.list();
