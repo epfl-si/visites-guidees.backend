@@ -125,7 +125,10 @@ export class ReservationService {
 
   async remove(id: number): Promise<void> {
     try {
-      await this.prisma.reservation.delete({ where: { id } });
+      await this.prisma.reservation.update({
+        where: { id },
+        data: { status: 'CANCELLED' },
+      });
       this.logger.log(`Removed reservation ${id}`);
     } catch (error) {
       if (
