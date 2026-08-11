@@ -1,15 +1,14 @@
 import {
-  BadRequestException,
   Injectable,
   NotFoundException,
+  UnprocessableEntityException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
-import { Place, Prisma } from '../../generated/prisma/client';
-import { UnprocessableEntityException } from '@nestjs/common';
-import Holidays from 'date-holidays';
+import { Prisma } from '../../generated/prisma/client';
 import { CreateReservationDto } from './dto/create.dto';
 import { UpdateReservationDto } from './dto/update.dto';
-import { ResponseReservationDto } from './dto/response.dto';
+import { ListReservationDto } from './dto/list.dto';
+import { ReadReservationDto } from './dto/read.dto';
 import { AppLogger as Logger } from '@/logger.service';
 
 @Injectable()
@@ -17,117 +16,12 @@ export class ReservationService {
   private readonly logger = new Logger(ReservationService.name);
 
   constructor(private prisma: PrismaService) {}
-  private readonly optionalFields = [
-    'company',
-    'additionnalAddress',
-    'comments',
-    'region',
-  ];
-  private readonly holidays = new Holidays('CH', 'VD');
 
-  getToursInfo(): Promise<Place[] | null> {
-    return this.prisma.place.findMany();
-  }
-
-  isBusinessDay(date: Date): boolean {
-    const day = date.getDay();
-
-    // Sunday or Saturday
-    if (day === 0 || day === 6) {
-      return false;
-    }
-
-    return !this.holidays.isHoliday(date);
-  }
-
-  isAtLeast7BusinessDaysBefore(visitDate: Date | string): boolean {
-    const today = new Date();
-    const visit = new Date(visitDate);
-
-    today.setHours(0, 0, 0, 0);
-    visit.setHours(0, 0, 0, 0);
-
-    if (today >= visit) {
-      return false;
-    }
-
-    let businessDays = 0;
-    const current = new Date(today);
-
-    while (current < visit) {
-      current.setDate(current.getDate() + 1);
-
-      if (this.isBusinessDay(current)) {
-        businessDays++;
-      }
-    }
-    return businessDays >= 7;
-  }
-  async createReservationInDB(data: Prisma.ReservationUncheckedCreateInput) {
-    return this.prisma.reservation.create({ data });
-  }
-
-  private mapToReservationCreateInput(
-    content: CreateReservationDto,
-    date: Date,
-  ): Prisma.ReservationUncheckedCreateInput {
-    return {
-      firstName: content.firstName,
-      lastName: content.lastName,
-      company: content.company ?? '',
-      email: content.email,
-      phone: content.phone,
-      address: content.address,
-      additionalAddress: content.additionnalAddress,
-      city: content.city,
-      region: content.region,
-      zip: content.zip,
-      country: content.country,
-      date,
-      participantNumber: Number(content.participantNumber),
-      languageId: Number(content.languageId),
-      placeId: Number(content.placeId),
-      comment: content.comments || null,
-      payment: '',
-      status: 'WAITINGGUIDE',
-    };
-  }
-
-  async register(content: CreateReservationDto) {
-    Object.entries(content).forEach(([key, value]) => {
-      if (!this.optionalFields.includes(key)) {
-        if (value === undefined || value === null || value === '') {
-          throw new BadRequestException(`${key} must be filled.`);
-        }
-      }
-    });
-
-    if (!content.gdprConsent) {
-      throw new UnprocessableEntityException('GDPR consent must be accepted.');
-    }
-
-    const visitDate = new Date(content.date);
-
-    if (!this.isAtLeast7BusinessDaysBefore(visitDate)) {
-      throw new UnprocessableEntityException(
-        'The visit date must be at least 7 business days before.',
-      );
-    }
-    // TODO : Remove mapping to reservationData and pass content directly to createReservationInDB
-    const reservationData = this.mapToReservationCreateInput(
-      content,
-      visitDate,
-    );
-
-    const reservation = await this.createReservationInDB(reservationData);
-
-    // TODO :  Notify the guides
-
-    return reservation;
-  }
-
-  async getLastReservations() {
-    const lastReservations = await this.prisma.reservation.findMany({
+  async list(
+    order: Prisma.SortOrder = Prisma.SortOrder.desc,
+    limit?: number,
+  ): Promise<ListReservationDto[]> {
+    const reservations = await this.prisma.reservation.findMany({
       select: {
         id: true,
         company: true,
@@ -135,17 +29,9 @@ export class ReservationService {
         date: true,
         status: true,
       },
-      orderBy: {
-        createdAt: 'asc',
-      },
-      take: 10,
+      orderBy: { createdAt: order },
+      ...(limit && { take: limit }),
     });
-
-    return lastReservations;
-  }
-
-  async list(): Promise<ResponseReservationDto[]> {
-    const reservations = await this.prisma.reservation.findMany();
 
     if (reservations.length === 0) {
       this.logger.warn('No reservation found');
@@ -156,7 +42,7 @@ export class ReservationService {
     return reservations;
   }
 
-  async read(id: number): Promise<ResponseReservationDto> {
+  async read(id: number): Promise<ReadReservationDto> {
     const reservation = await this.prisma.reservation.findUnique({
       where: { id },
     });
@@ -170,10 +56,44 @@ export class ReservationService {
     return reservation;
   }
 
+  async create(
+    createReservationDto: CreateReservationDto,
+  ): Promise<ReadReservationDto> {
+    if (!createReservationDto.gdprConsent) {
+      throw new UnprocessableEntityException('GDPR consent must be accepted.');
+    }
+
+    const reservation = await this.prisma.reservation.create({
+      data: {
+        firstName: createReservationDto.firstName,
+        lastName: createReservationDto.lastName,
+        company: createReservationDto.company,
+        email: createReservationDto.email,
+        phone: createReservationDto.phone,
+        address: createReservationDto.address,
+        additionalAddress: createReservationDto.additionnalAddress,
+        city: createReservationDto.city,
+        zip: createReservationDto.zip,
+        region: createReservationDto.region ?? '',
+        country: createReservationDto.country,
+        date: new Date(createReservationDto.date),
+        participantNumber: createReservationDto.participantNumber,
+        languageId: createReservationDto.languageId,
+        placeId: createReservationDto.placeId,
+        comment: createReservationDto.comments,
+        payment: '',
+        status: 'WAITINGGUIDE',
+      },
+    });
+
+    this.logger.log(`Created reservation ${reservation.id}`);
+    return reservation;
+  }
+
   async update(
     id: number,
     updateReservationDto: UpdateReservationDto,
-  ): Promise<ResponseReservationDto> {
+  ): Promise<ReadReservationDto> {
     try {
       const reservation = await this.prisma.reservation.update({
         where: { id },
