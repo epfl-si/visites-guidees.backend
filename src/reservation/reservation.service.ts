@@ -22,6 +22,7 @@ export class ReservationService {
     limit?: number,
   ): Promise<ListReservationDto[]> {
     const reservations = await this.prisma.reservation.findMany({
+      where: { status: { not: 'CANCELLED' } },
       select: {
         id: true,
         company: true,
