@@ -6,7 +6,7 @@ import { ReadGuideDto } from './dto/read.dto';
 import { CreateGuideDto } from './dto/create.dto';
 import { UpdateGuideDto } from './dto/update.dto';
 import { ApiService } from '../services/api/api.service';
-import { Person } from './interfaces/person.interface';
+import { Person } from '../services/api/interfaces/person.interface';
 import { AppLogger as Logger } from '@/logger.service';
 
 @Injectable()
@@ -16,7 +16,7 @@ export class GuideService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly apiService: ApiService,
-  ) {}
+  ) { }
 
   async list(): Promise<ListGuideDto[]> {
     const guides = await this.prisma.guide.findMany({
