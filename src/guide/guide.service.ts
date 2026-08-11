@@ -57,7 +57,7 @@ export class GuideService {
     }
 
     const id = Number(person.id);
-    const phone = person.phones?.map((p) => p.number);
+    const phone = person.phones?.map((p) => p.number) ?? [];
     const email = person.email || person.account.username + '@epfl.ch';
 
     await this.prisma.user.upsert({
