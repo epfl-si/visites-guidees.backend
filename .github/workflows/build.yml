@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       security-events: write
-      contents: read
+      contents: write
       packages: write
     name: Build and push image
 
@@ -20,7 +20,7 @@ jobs:
       - name: Clone repository
         uses: actions/checkout@v6
         with:
-          fetch-depth: 2
+          fetch-depth: 0
 
       - name: Check change version
         id: check_version
@@ -30,6 +30,7 @@ jobs:
 
           if [ "$OLD_VERSION" != "$NEW_VERSION" ]; then
             echo "changed=true" >> $GITHUB_OUTPUT
+            echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
           else
             echo "changed=false" >> $GITHUB_OUTPUT
           fi
@@ -41,10 +42,10 @@ jobs:
 
       - name: Scan image
         if: steps.check_version.outputs.changed == 'true'
-        uses: aquasecurity/trivy-action@0.36.0
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: 'backend'
-          secerity: 'CRITICAL,HIGH'
+          severity: 'CRITICAL,HIGH'
           ignore-unfixed: true
           format: 'sarif'
           limit-severities-for-sarif: true
@@ -68,8 +69,15 @@ jobs:
         if: steps.check_version.outputs.changed == 'true'
         run: |
           IMAGE_ID=$(echo "ghcr.io/${{ github.repository }}" | tr '[A-Z]' '[a-z]')
-          VERSION=$(jq -r '.version' package.json)
+          VERSION=${{ steps.check_version.outputs.version }}
           echo "Push image $IMAGE_ID:$VERSION"
 
           docker tag backend $IMAGE_ID:$VERSION
           docker push $IMAGE_ID:$VERSION
+
+      - name: Create release
+        if: steps.check_version.outputs.changed == 'true'
+        uses: dwesh163/actions/release@main
+        with:
+          version: ${{ steps.check_version.outputs.version }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
