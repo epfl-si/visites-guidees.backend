@@ -25,7 +25,7 @@ export class UserService {
       firstName: Req.given_name,
       lastName: Req.family_name,
       mail: Req.mail,
-      isAdmin: Req.groups.includes('guided-tours-admin_AppGrpU'),
+      isAdmin: Req.groups.includes('visites-guidees-admins_AppGrpU'),
       isGuide: guide ? true : false,
     };
     return data;
@@ -33,7 +33,7 @@ export class UserService {
 
   async search(params: string) {
     const data = await this.apiService.callEPFLApi<PersonsSearchResponse>(
-      `v1/persons?query=${params}&pagesize=5`,
+      `v1/persons?query=${params}&pagesize=5&isaccredited=1`,
     );
 
     if (!data) {

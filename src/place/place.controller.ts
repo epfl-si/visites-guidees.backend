@@ -39,7 +39,7 @@ export class PlaceController {
   @Post()
   @ApiResponse({ type: ResponsePlaceDto })
   @UseGuards(AzureAdGuard, GroupsGuard)
-  @RequireGroups('guided-tours-admin_AppGrpU')
+  @RequireGroups('visites-guidees-admins_AppGrpU')
   @ApiBearerAuth('access-token')
   create(@Body() createPlaceDto: CreatePlaceDto): Promise<ResponsePlaceDto> {
     return this.placeService.create(createPlaceDto);
@@ -48,7 +48,7 @@ export class PlaceController {
   @Patch(':id')
   @ApiResponse({ type: ResponsePlaceDto })
   @UseGuards(AzureAdGuard, GroupsGuard)
-  @RequireGroups('guided-tours-admin_AppGrpU')
+  @RequireGroups('visites-guidees-admins_AppGrpU')
   @ApiBearerAuth('access-token')
   update(
     @Param('id', ParseIntPipe) id: number,
@@ -60,7 +60,7 @@ export class PlaceController {
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   @UseGuards(AzureAdGuard, GroupsGuard)
-  @RequireGroups('guided-tours-admin_AppGrpU')
+  @RequireGroups('visites-guidees-admins_AppGrpU')
   @ApiBearerAuth('access-token')
   remove(@Param('id', ParseIntPipe) id: number): Promise<void> {
     return this.placeService.remove(id);

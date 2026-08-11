@@ -37,7 +37,7 @@ export class ReservationController {
   @Get()
   @ApiResponse({ type: [ResponseReservationDto] })
   @UseGuards(AzureAdGuard, GroupsGuard)
-  @RequireGroups('guided-tours-admin_AppGrpU')
+  @RequireGroups('visites-guidees-admins_AppGrpU')
   @ApiBearerAuth('access-token')
   list(): Promise<ResponseReservationDto[]> {
     return this.reservationService.list();
@@ -46,7 +46,7 @@ export class ReservationController {
   @Get(':id')
   @ApiResponse({ type: ResponseReservationDto })
   @UseGuards(AzureAdGuard, GroupsGuard)
-  @RequireGroups('guided-tours-admin_AppGrpU')
+  @RequireGroups('visites-guidees-admins_AppGrpU')
   @ApiBearerAuth('access-token')
   read(@Param('id', ParseIntPipe) id: number): Promise<ResponseReservationDto> {
     return this.reservationService.read(id);
@@ -55,7 +55,7 @@ export class ReservationController {
   @Patch(':id')
   @ApiResponse({ type: ResponseReservationDto })
   @UseGuards(AzureAdGuard, GroupsGuard)
-  @RequireGroups('guided-tours-admin_AppGrpU')
+  @RequireGroups('visites-guidees-admins_AppGrpU')
   @ApiBearerAuth('access-token')
   update(
     @Param('id', ParseIntPipe) id: number,
@@ -67,7 +67,7 @@ export class ReservationController {
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   @UseGuards(AzureAdGuard, GroupsGuard)
-  @RequireGroups('guided-tours-admin_AppGrpU')
+  @RequireGroups('visites-guidees-admins_AppGrpU')
   @ApiBearerAuth('access-token')
   remove(@Param('id', ParseIntPipe) id: number): Promise<void> {
     return this.reservationService.remove(id);
