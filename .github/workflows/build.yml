@@ -14,7 +14,7 @@ jobs:
       security-events: write
       contents: read
       packages: write
-    name: Build ans push image
+    name: Build and push image
 
     steps:
       - name: Clone repository
