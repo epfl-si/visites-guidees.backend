@@ -4,9 +4,11 @@ import { UseGuards, Req } from '@nestjs/common';
 import { AzureAdGuard } from '../auth/azure-ad-auth.guard';
 import { UserService } from './user.service';
 import { ReqEntraOauthUser } from '../types/auth';
+import { GroupsGuard } from '@/guards/groups.guard';
+import { RequireGroups } from '@/decorators/require-groups.decorator';
 @Controller({ path: 'users', version: '1' })
 export class UserController {
-  constructor(private readonly userService: UserService) {}
+  constructor(private readonly userService: UserService) { }
 
   @UseGuards(AzureAdGuard)
   @Get('me')
@@ -14,6 +16,8 @@ export class UserController {
     return this.userService.FormatUserInfo(req.user);
   }
 
+  @UseGuards(AzureAdGuard, GroupsGuard)
+  @RequireGroups('visites-guidees-admins_AppGrpU')
   @Get('search')
   searchUsers(@Query('query') query: string) {
     return this.userService.search(query);
