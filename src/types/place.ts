@@ -1,5 +1,5 @@
-import { places } from '../../generated/prisma/client';
+import { Place } from '../../generated/prisma/client';
 
-export type placeAndLanguage = places & {
+export type placeAndLanguage = Place & {
   Languages: { name: string; id: number }[];
 };

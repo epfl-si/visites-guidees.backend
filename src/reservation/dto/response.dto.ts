@@ -1,21 +1,17 @@
-// place.entity.ts
 import { ApiProperty } from '@nestjs/swagger';
 import {
-  reservations as PrismaReservation,
-  placeLanguage,
-} from '../../../generated/prisma/client';
-import {
+  IsString,
   IsNumber,
   IsOptional,
-  IsString,
   IsNotEmpty,
   IsDate,
+  IsEnum,
 } from 'class-validator';
+import { ReservationStatus } from '../../../generated/prisma/client';
 
-export class ReservationEntity implements PrismaReservation {
+export class ResponseReservationDto {
   @ApiProperty()
   @IsNumber()
-  @IsNotEmpty()
   id!: number;
 
   @ApiProperty()
@@ -29,11 +25,12 @@ export class ReservationEntity implements PrismaReservation {
   lastName!: string;
 
   @ApiProperty()
-  @IsOptional()
   @IsString()
-  company!: string;
+  @IsOptional()
+  company!: string | null;
 
   @ApiProperty()
+  @IsString()
   @IsNotEmpty()
   email!: string;
 
@@ -50,7 +47,7 @@ export class ReservationEntity implements PrismaReservation {
   @ApiProperty()
   @IsString()
   @IsOptional()
-  additionnalAddress!: string;
+  additionalAddress!: string | null;
 
   @ApiProperty()
   @IsString()
@@ -58,9 +55,9 @@ export class ReservationEntity implements PrismaReservation {
   city!: string;
 
   @ApiProperty()
-  @IsNumber()
+  @IsString()
   @IsNotEmpty()
-  zip!: number;
+  zip!: string;
 
   @ApiProperty()
   @IsString()
@@ -74,44 +71,39 @@ export class ReservationEntity implements PrismaReservation {
 
   @ApiProperty()
   @IsDate()
-  @IsNotEmpty()
-  visitDate!: Date;
+  date!: Date;
 
   @ApiProperty()
   @IsNumber()
-  @IsNotEmpty()
-  numberOfParticipant!: number;
+  participantNumber!: number;
 
   @ApiProperty()
   @IsString()
   @IsOptional()
-  comments!: string;
+  comment!: string | null;
 
   @ApiProperty()
   @IsString()
   @IsOptional()
   payment!: string;
 
-  @ApiProperty()
-  @IsNumber()
-  @IsNotEmpty()
-  statusId!: number;
+  @ApiProperty({ enum: ReservationStatus })
+  @IsEnum(ReservationStatus)
+  status!: ReservationStatus;
 
   @ApiProperty()
   @IsNumber()
-  @IsNotEmpty()
   languageId!: number;
 
   @ApiProperty()
   @IsNumber()
-  @IsNotEmpty()
   placeId!: number;
 
   @ApiProperty()
   @IsDate()
-  @IsNotEmpty()
   createdAt!: Date;
 
-  @ApiProperty({ type: () => [Object], required: false })
-  placeLanguages?: placeLanguage[];
+  @ApiProperty()
+  @IsDate()
+  updatedAt!: Date;
 }

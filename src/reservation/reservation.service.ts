@@ -1,12 +1,21 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
-import { places, Prisma } from '../../generated/prisma/client';
+import { Place, Prisma } from '../../generated/prisma/client';
 import { UnprocessableEntityException } from '@nestjs/common';
 import Holidays from 'date-holidays';
-import { CreateReservationDto } from './dto/create-reservation.dto';
+import { CreateReservationDto } from './dto/create.dto';
+import { UpdateReservationDto } from './dto/update.dto';
+import { ResponseReservationDto } from './dto/response.dto';
+import { AppLogger as Logger } from '@/logger.service';
 
 @Injectable()
 export class ReservationService {
+  private readonly logger = new Logger(ReservationService.name);
+
   constructor(private prisma: PrismaService) {}
   private readonly optionalFields = [
     'company',
@@ -16,8 +25,8 @@ export class ReservationService {
   ];
   private readonly holidays = new Holidays('CH', 'VD');
 
-  getToursInfo(): Promise<places[] | null> {
-    return this.prisma.places.findMany();
+  getToursInfo(): Promise<Place[] | null> {
+    return this.prisma.place.findMany();
   }
 
   isBusinessDay(date: Date): boolean {
@@ -54,14 +63,14 @@ export class ReservationService {
     }
     return businessDays >= 7;
   }
-  async createReservationInDB(data: Prisma.reservationsUncheckedCreateInput) {
-    return this.prisma.reservations.create({ data });
+  async createReservationInDB(data: Prisma.ReservationUncheckedCreateInput) {
+    return this.prisma.reservation.create({ data });
   }
 
   private mapToReservationCreateInput(
     content: CreateReservationDto,
-    visitDate: Date,
-  ): Prisma.reservationsUncheckedCreateInput {
+    date: Date,
+  ): Prisma.ReservationUncheckedCreateInput {
     return {
       firstName: content.firstName,
       lastName: content.lastName,
@@ -69,18 +78,18 @@ export class ReservationService {
       email: content.email,
       phone: content.phone,
       address: content.address,
-      additionnalAddress: content.additionnalAddress || null,
+      additionalAddress: content.additionnalAddress,
       city: content.city,
       region: content.region,
-      zip: Number(content.zip),
+      zip: content.zip,
       country: content.country,
-      visitDate,
-      numberOfParticipant: Number(content.numberOfParticipant),
+      date,
+      participantNumber: Number(content.participantNumber),
       languageId: Number(content.languageId),
       placeId: Number(content.placeId),
-      comments: content.comments || null,
+      comment: content.comments || null,
       payment: '',
-      statusId: 1,
+      status: 'WAITINGGUIDE',
     };
   }
 
@@ -97,10 +106,7 @@ export class ReservationService {
       throw new UnprocessableEntityException('GDPR consent must be accepted.');
     }
 
-    const visitDate: Date =
-      typeof content.visitDate === 'number'
-        ? new Date(content.visitDate)
-        : content.visitDate;
+    const visitDate = new Date(content.date);
 
     if (!this.isAtLeast7BusinessDaysBefore(visitDate)) {
       throw new UnprocessableEntityException(
@@ -121,12 +127,12 @@ export class ReservationService {
   }
 
   async getLastReservations() {
-    const lastReservations = await this.prisma.reservations.findMany({
+    const lastReservations = await this.prisma.reservation.findMany({
       select: {
         id: true,
         company: true,
         email: true,
-        visitDate: true,
+        date: true,
         status: true,
       },
       orderBy: {
@@ -136,5 +142,71 @@ export class ReservationService {
     });
 
     return lastReservations;
+  }
+
+  async list(): Promise<ResponseReservationDto[]> {
+    const reservations = await this.prisma.reservation.findMany();
+
+    if (reservations.length === 0) {
+      this.logger.warn('No reservation found');
+      throw new NotFoundException('No reservation found');
+    }
+
+    this.logger.log(`Listed ${reservations.length} reservation(s)`);
+    return reservations;
+  }
+
+  async read(id: number): Promise<ResponseReservationDto> {
+    const reservation = await this.prisma.reservation.findUnique({
+      where: { id },
+    });
+
+    if (!reservation) {
+      this.logger.warn(`No reservation found with id ${id}`);
+      throw new NotFoundException(`No reservation found with id ${id}`);
+    }
+
+    this.logger.log(`Read reservation ${id}`);
+    return reservation;
+  }
+
+  async update(
+    id: number,
+    updateReservationDto: UpdateReservationDto,
+  ): Promise<ResponseReservationDto> {
+    try {
+      const reservation = await this.prisma.reservation.update({
+        where: { id },
+        data: updateReservationDto,
+      });
+
+      this.logger.log(`Updated reservation ${id}`);
+      return reservation;
+    } catch (error) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2025'
+      ) {
+        this.logger.warn(`No reservation found with id ${id}`);
+        throw new NotFoundException(`No reservation found with id ${id}`);
+      }
+      throw error;
+    }
+  }
+
+  async remove(id: number): Promise<void> {
+    try {
+      await this.prisma.reservation.delete({ where: { id } });
+      this.logger.log(`Removed reservation ${id}`);
+    } catch (error) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2025'
+      ) {
+        this.logger.warn(`No reservation found with id ${id}`);
+        throw new NotFoundException(`No reservation found with id ${id}`);
+      }
+      throw error;
+    }
   }
 }
