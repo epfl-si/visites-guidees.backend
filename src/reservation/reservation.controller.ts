@@ -8,6 +8,8 @@ import {
   Delete,
   Param,
   ParseIntPipe,
+  ParseEnumPipe,
+  Query,
   UseGuards,
   HttpCode,
   HttpStatus,
@@ -15,7 +17,9 @@ import {
 import { ApiBearerAuth, ApiResponse } from '@nestjs/swagger';
 import { CreateReservationDto } from './dto/create.dto';
 import { UpdateReservationDto } from './dto/update.dto';
-import { ResponseReservationDto } from './dto/response.dto';
+import { ListReservationDto } from './dto/list.dto';
+import { ReadReservationDto } from './dto/read.dto';
+import { Prisma } from '../../generated/prisma/client';
 import { AzureAdGuard } from '../auth/azure-ad-auth.guard';
 import { GroupsGuard } from '../guards/groups.guard';
 import { RequireGroups } from '../decorators/require-groups.decorator';
@@ -24,43 +28,45 @@ import { RequireGroups } from '../decorators/require-groups.decorator';
 export class ReservationController {
   constructor(private readonly reservationService: ReservationService) {}
 
-  @Post('/register')
-  Register(@Body() content: CreateReservationDto) {
-    return this.reservationService.register(content);
-  }
-
-  @Get('/last')
-  GetLast() {
-    return this.reservationService.getLastReservations();
-  }
-
   @Get()
-  @ApiResponse({ type: [ResponseReservationDto] })
+  @ApiResponse({ type: [ListReservationDto] })
   @UseGuards(AzureAdGuard, GroupsGuard)
   @RequireGroups('visites-guidees-admins_AppGrpU')
   @ApiBearerAuth('access-token')
-  list(): Promise<ResponseReservationDto[]> {
-    return this.reservationService.list();
+  list(
+    @Query('order', new ParseEnumPipe(Prisma.SortOrder, { optional: true }))
+    order?: Prisma.SortOrder,
+    @Query('limit', new ParseIntPipe({ optional: true })) limit?: number,
+  ): Promise<ListReservationDto[]> {
+    return this.reservationService.list(order, limit);
   }
 
   @Get(':id')
-  @ApiResponse({ type: ResponseReservationDto })
+  @ApiResponse({ type: ReadReservationDto })
   @UseGuards(AzureAdGuard, GroupsGuard)
   @RequireGroups('visites-guidees-admins_AppGrpU')
   @ApiBearerAuth('access-token')
-  read(@Param('id', ParseIntPipe) id: number): Promise<ResponseReservationDto> {
+  read(@Param('id', ParseIntPipe) id: number): Promise<ReadReservationDto> {
     return this.reservationService.read(id);
   }
 
+  @Post()
+  @ApiResponse({ type: ReadReservationDto })
+  create(
+    @Body() createReservationDto: CreateReservationDto,
+  ): Promise<ReadReservationDto> {
+    return this.reservationService.create(createReservationDto);
+  }
+
   @Patch(':id')
-  @ApiResponse({ type: ResponseReservationDto })
+  @ApiResponse({ type: ReadReservationDto })
   @UseGuards(AzureAdGuard, GroupsGuard)
   @RequireGroups('visites-guidees-admins_AppGrpU')
   @ApiBearerAuth('access-token')
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateReservationDto: UpdateReservationDto,
-  ): Promise<ResponseReservationDto> {
+  ): Promise<ReadReservationDto> {
     return this.reservationService.update(id, updateReservationDto);
   }
 

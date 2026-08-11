@@ -2,6 +2,7 @@ import {
   IsString,
   IsNumber,
   IsNotEmpty,
+  IsOptional,
   IsBoolean,
   IsDateString,
 } from 'class-validator';
@@ -18,9 +19,10 @@ export class CreateReservationDto {
   @IsNotEmpty()
   lastName!: string;
 
-  @ApiProperty()
+  @ApiProperty({ required: false })
+  @IsOptional()
   @IsString()
-  company!: string;
+  company?: string;
 
   @ApiProperty()
   @IsString()
@@ -37,9 +39,10 @@ export class CreateReservationDto {
   @IsNotEmpty()
   address!: string;
 
-  @ApiProperty()
+  @ApiProperty({ required: false })
+  @IsOptional()
   @IsString()
-  additionnalAddress!: string;
+  additionnalAddress?: string;
 
   @ApiProperty()
   @IsString()
@@ -51,10 +54,10 @@ export class CreateReservationDto {
   @IsNotEmpty()
   zip!: string;
 
-  @ApiProperty()
+  @ApiProperty({ required: false })
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
-  region!: string;
+  region?: string;
 
   @ApiProperty()
   @IsString()
@@ -81,9 +84,10 @@ export class CreateReservationDto {
   @IsNotEmpty()
   placeId!: number;
 
-  @ApiProperty()
+  @ApiProperty({ required: false })
+  @IsOptional()
   @IsString()
-  comments!: string;
+  comments?: string;
 
   @ApiProperty()
   @IsBoolean()
