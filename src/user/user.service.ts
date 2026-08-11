@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ReqEntraOauthUser, UserInfo } from '../types/auth';
 import { PrismaService } from '../prisma.service';
-import { PersonsSearchResponse } from '../guide/interfaces/person.interface';
+import { PersonsSearchResponse } from '@/services/api/interfaces/person.interface';
 import { ResponseUserSearch } from './dto/response-user-dto';
 import { ApiService } from '../services/api/api.service';
 
@@ -10,7 +10,7 @@ export class UserService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly apiService: ApiService,
-  ) {}
+  ) { }
 
   async FormatUserInfo(Req: ReqEntraOauthUser): Promise<UserInfo> {
     const guide = await this.prisma.guide.findUnique({
