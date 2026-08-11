@@ -1,6 +1,6 @@
 import { PartialType, OmitType } from '@nestjs/swagger';
-import { ResponseReservationDto } from './response.dto';
+import { ReadReservationDto } from './read.dto';
 
 export class UpdateReservationDto extends PartialType(
-  OmitType(ResponseReservationDto, ['id', 'createdAt', 'updatedAt'] as const),
+  OmitType(ReadReservationDto, ['id', 'createdAt', 'updatedAt'] as const),
 ) {}
