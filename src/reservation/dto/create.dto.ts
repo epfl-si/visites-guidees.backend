@@ -54,10 +54,10 @@ export class CreateReservationDto {
   @IsNotEmpty()
   zip!: string;
 
-  @ApiProperty({ required: false })
-  @IsOptional()
+  @ApiProperty()
   @IsString()
-  region?: string;
+  @IsNotEmpty()
+  region!: string;
 
   @ApiProperty()
   @IsString()
