@@ -91,7 +91,7 @@ export class ReservationService {
         email: createReservationDto.email,
         phone: createReservationDto.phone,
         address: createReservationDto.address,
-        additionalAddress: createReservationDto.additionnalAddress,
+        additionalAddress: createReservationDto.additionalAddress,
         city: createReservationDto.city,
         zip: createReservationDto.zip,
         region: createReservationDto.region ?? '',
