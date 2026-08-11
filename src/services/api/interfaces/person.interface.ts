@@ -7,7 +7,7 @@ export interface Person {
   account: {
     username: string;
   };
-  phones: {
+  phones?: {
     number: string;
   }[];
 }
