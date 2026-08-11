@@ -80,7 +80,7 @@ export class ReservationService {
         participantNumber: createReservationDto.participantNumber,
         languageId: createReservationDto.languageId,
         placeId: createReservationDto.placeId,
-        comment: createReservationDto.comments,
+        comment: createReservationDto.comment,
         payment: '',
         status: 'WAITINGGUIDE',
       },

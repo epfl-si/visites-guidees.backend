@@ -87,7 +87,7 @@ export class CreateReservationDto {
   @ApiProperty({ required: false })
   @IsOptional()
   @IsString()
-  comments?: string;
+  comment?: string;
 
   @ApiProperty()
   @IsBoolean()
