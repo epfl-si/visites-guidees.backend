@@ -25,93 +25,106 @@ async function main() {
 
   // ============================================
   // LANGUAGES
+  // Pas d'id explicite : Language.id est autoincrement, on récupère
+  // les ids générés et on les référence ensuite par leur code.
   // ============================================
   const languagesData = [
-    { id: 1, code: 'fr', name: 'Français' },
-    { id: 2, code: 'en', name: 'English' },
-    { id: 3, code: 'de', name: 'Deutsch' },
-    { id: 4, code: 'it', name: 'Italiano' },
-    { id: 5, code: 'es', name: 'Español' },
-    { id: 6, code: 'pt', name: 'Português' },
+    { code: 'fr', name: 'Français' },
+    { code: 'en', name: 'English' },
+    { code: 'de', name: 'Deutsch' },
+    { code: 'it', name: 'Italiano' },
+    { code: 'es', name: 'Español' },
+    { code: 'pt', name: 'Português' },
   ];
   await prisma.language.createMany({ data: languagesData });
 
+  const languages = await prisma.language.findMany();
+  const languageIdByCode: Record<string, number> = Object.fromEntries(
+    languages.map((language) => [language.code, language.id]),
+  );
+
   // ============================================
   // PLACES
+  // Pas d'id explicite : Place.id est autoincrement. On utilise une
+  // clé locale (`key`) pour pouvoir référencer le lieu créé plus bas
+  // (blocked periods, réservations) une fois son id réel connu.
   // ============================================
   const placesData = [
     {
-      id: 1,
+      key: 'campus-standard',
       title: { fr: 'Campus EPFL (Standard)', en: 'EPFL Campus (Standard)' },
       picture: 'https://www.epfl.ch/campus/visitors/wp-content/uploads/2019/04/campus_rolex.jpg',
       description: { fr: 'Visite guidée générale du campus', en: 'General guided tour of the campus' },
       capacity: 20,
       price: 150,
       conditions: { fr: 'Bonnes chaussures recommandées', en: 'Good shoes recommended' },
-      languageIds: [1, 2, 3],
+      languageCodes: ['fr', 'en', 'de'],
     },
     {
-      id: 2,
+      key: 'architecture-tour',
       title: { fr: 'Visite Architecture', en: 'Architecture Tour' },
       picture: 'https://www.epfl.ch/campus/visitors/wp-content/uploads/2019/04/artlab.jpg',
       description: { fr: 'Découverte des bâtiments emblématiques', en: 'Discovery of iconic buildings' },
       capacity: 15,
       price: 200,
       conditions: { fr: 'Aucune condition particulière', en: 'No special conditions' },
-      languageIds: [1, 2],
+      languageCodes: ['fr', 'en'],
     },
     {
-      id: 3,
+      key: 'rolex-learning-center',
       title: { fr: 'Rolex Learning Center', en: 'Rolex Learning Center' },
       picture: 'https://www.epfl.ch/campus/visitors/wp-content/uploads/2019/04/rolex-learning-center.jpg',
       description: { fr: 'Visite du bâtiment emblématique et de sa bibliothèque', en: 'Tour of the iconic building and its library' },
       capacity: 25,
       price: 100,
       conditions: { fr: "Silence requis à l'intérieur", en: 'Silence required inside' },
-      languageIds: [1, 2, 3, 4],
+      languageCodes: ['fr', 'en', 'de', 'it'],
     },
     {
-      id: 4,
+      key: 'research-labs',
       title: { fr: 'Laboratoires de recherche', en: 'Research Labs' },
       picture: 'https://www.epfl.ch/campus/visitors/wp-content/uploads/2019/04/labs.jpg',
       description: { fr: 'Découverte des laboratoires de pointe', en: 'Discovery of cutting-edge research labs' },
       capacity: 12,
       price: 250,
       conditions: { fr: 'Accès réservé aux plus de 16 ans', en: 'Access restricted to 16+' },
-      languageIds: [1, 2],
+      languageCodes: ['fr', 'en'],
     },
     {
-      id: 5,
+      key: 'artlab',
       title: { fr: 'ArtLab', en: 'ArtLab' },
       picture: 'https://www.epfl.ch/campus/visitors/wp-content/uploads/2019/04/artlab2.jpg',
       description: { fr: 'Visite du centre culturel et artistique', en: 'Tour of the cultural and art center' },
       capacity: 30,
       price: 120,
       conditions: { fr: 'Aucune condition particulière', en: 'No special conditions' },
-      languageIds: [1, 2, 3, 4, 5],
+      languageCodes: ['fr', 'en', 'de', 'it', 'es'],
     },
     {
-      id: 6,
+      key: 'night-tour',
       title: { fr: 'Visite nocturne du campus', en: 'Night Campus Tour' },
       picture: 'https://www.epfl.ch/campus/visitors/wp-content/uploads/2019/04/campus-night.jpg',
       description: { fr: 'Découverte du campus illuminé en soirée', en: 'Discovery of the illuminated campus at night' },
       capacity: 18,
       price: 180,
       conditions: { fr: 'Vêtements chauds conseillés', en: 'Warm clothing recommended' },
-      languageIds: [1, 2],
+      languageCodes: ['fr', 'en'],
     },
   ];
 
+  const placeIdByKey: Record<string, number> = {};
+
   for (const place of placesData) {
-    const { languageIds, ...data } = place;
-    await prisma.place.create({
+    const { key, languageCodes, ...data } = place;
+    const created = await prisma.place.create({
       data: {
         ...data,
         languages: {
-          connect: languageIds.map((id) => ({ id })),
+          connect: languageCodes.map((code) => ({ id: languageIdByCode[code] })),
         },
       },
     });
+    placeIdByKey[key] = created.id;
   }
 
   // ============================================
@@ -125,28 +138,28 @@ async function main() {
       label: { fr: "Fermeture de fin d'année", en: 'Year-end closure' },
       start: new Date(currentYear, 11, 24),
       end: new Date(currentYear + 1, 0, 3),
-      placeIds: [1, 2, 3, 4, 5, 6],
+      placeKeys: ['campus-standard', 'architecture-tour', 'rolex-learning-center', 'research-labs', 'artlab', 'night-tour'],
       guideIds: [111111, 222222, 333333, 444444, 555555, 666666],
     },
     {
       label: { fr: 'Maintenance Rolex Learning Center', en: 'Rolex Learning Center maintenance' },
       start: new Date(currentYear, 2, 10),
       end: new Date(currentYear, 2, 14),
-      placeIds: [3],
+      placeKeys: ['rolex-learning-center'],
       guideIds: [],
     },
     {
       label: { fr: 'Vacances académiques été', en: 'Summer academic break' },
       start: new Date(currentYear, 6, 15),
       end: new Date(currentYear, 7, 15),
-      placeIds: [4],
+      placeKeys: ['research-labs'],
       guideIds: [444444, 666666],
     },
     {
       label: { fr: 'Indisponibilité guide - congé', en: 'Guide unavailability - leave' },
       start: new Date(currentYear, 4, 1),
       end: new Date(currentYear, 4, 10),
-      placeIds: [],
+      placeKeys: [],
       guideIds: [222222],
     },
   ];
@@ -155,13 +168,16 @@ async function main() {
   // USERS & GUIDES
   // Guide.id partage la clé primaire de User.id, donc on
   // crée le User d'abord, puis le Guide avec le même id.
+  // Ici l'id EST explicite volontairement : il correspond au sciper
+  // EPFL (voir GuideService.create, qui utilise le même id pour User
+  // et Guide), une source externe, pas une valeur autoincrement.
   // ============================================
   const guidesData = [
     {
       id: 111111,
       status: 'ACTIVE' as const,
       phone: ['+41 21 693 11 11'],
-      languageIds: [1, 2],
+      languageCodes: ['fr', 'en'],
       user: {
         firstName: 'Alice',
         lastName: 'Martin',
@@ -173,7 +189,7 @@ async function main() {
       id: 222222,
       status: 'ACTIVE' as const,
       phone: ['+41 21 693 22 22'],
-      languageIds: [1, 2, 3],
+      languageCodes: ['fr', 'en', 'de'],
       user: {
         firstName: 'Bob',
         lastName: 'Dupont',
@@ -185,7 +201,7 @@ async function main() {
       id: 333333,
       status: 'ACTIVE' as const,
       phone: ['+41 21 693 33 33'],
-      languageIds: [1, 4],
+      languageCodes: ['fr', 'it'],
       user: {
         firstName: 'Chiara',
         lastName: 'Rossi',
@@ -197,7 +213,7 @@ async function main() {
       id: 444444,
       status: 'INACTIVE' as const,
       phone: ['+41 21 693 44 44'],
-      languageIds: [1, 2, 5],
+      languageCodes: ['fr', 'en', 'es'],
       user: {
         firstName: 'David',
         lastName: 'Fernandez',
@@ -209,7 +225,7 @@ async function main() {
       id: 555555,
       status: 'ACTIVE' as const,
       phone: ['+41 21 693 55 55'],
-      languageIds: [2, 3],
+      languageCodes: ['en', 'de'],
       user: {
         firstName: 'Emma',
         lastName: 'Müller',
@@ -221,7 +237,7 @@ async function main() {
       id: 666666,
       status: 'RETIRED' as const,
       phone: ['+41 21 693 66 66'],
-      languageIds: [1, 2, 3, 4, 5, 6],
+      languageCodes: ['fr', 'en', 'de', 'it', 'es', 'pt'],
       user: {
         firstName: 'Fabio',
         lastName: 'Pereira',
@@ -232,7 +248,7 @@ async function main() {
   ];
 
   for (const guide of guidesData) {
-    const { languageIds, user, id, status, phone } = guide;
+    const { languageCodes, user, id, status, phone } = guide;
 
     await prisma.user.create({
       data: {
@@ -250,7 +266,7 @@ async function main() {
         status,
         phone,
         languages: {
-          connect: languageIds.map((langId) => ({ id: langId })),
+          connect: languageCodes.map((code) => ({ id: languageIdByCode[code] })),
         },
       },
     });
@@ -260,12 +276,12 @@ async function main() {
   // CRÉATION DES BLOCKED PERIODS
   // ============================================
   for (const period of blockedPeriodsData) {
-    const { placeIds, guideIds, ...data } = period;
+    const { placeKeys, guideIds, ...data } = period;
     await prisma.blockedPeriod.create({
       data: {
         ...data,
         places: {
-          connect: placeIds.map((placeId) => ({ id: placeId })),
+          connect: placeKeys.map((key) => ({ id: placeIdByKey[key] })),
         },
         guides: {
           connect: guideIds.map((guideId) => ({ id: guideId })),
@@ -276,6 +292,8 @@ async function main() {
 
   // ============================================
   // RESERVATIONS & RESERVATION GUIDES
+  // Pas d'id explicite : Reservation.id est autoincrement, comme dans
+  // le vrai flux applicatif (ReservationService.register).
   // ============================================
   const inDays = (n: number) => {
     const d = new Date();
@@ -285,7 +303,6 @@ async function main() {
 
   const reservationsData = [
     {
-      id: 1,
       firstName: 'Jean',
       lastName: 'Rousseau',
       company: 'Gymnase de la Cité',
@@ -301,14 +318,13 @@ async function main() {
       payment: 'Facture',
       participantNumber: 25,
       status: 'READY' as const,
-      languageId: 1,
-      placeId: 1,
+      languageCode: 'fr',
+      placeKey: 'campus-standard',
       comment: 'Classe de maturité scientifique',
       guideId: 111111,
       guideStatus: 'ACCEPTED' as const,
     },
     {
-      id: 2,
       firstName: 'John',
       lastName: 'Smith',
       company: 'Tech Corp',
@@ -324,14 +340,13 @@ async function main() {
       payment: 'Sur place (Carte)',
       participantNumber: 10,
       status: 'WAITINGGUIDE' as const,
-      languageId: 2,
-      placeId: 2,
+      languageCode: 'en',
+      placeKey: 'architecture-tour',
       comment: null,
       guideId: null,
       guideStatus: null,
     },
     {
-      id: 3,
       firstName: 'Maria',
       lastName: 'Gonzalez',
       company: null,
@@ -347,14 +362,13 @@ async function main() {
       payment: 'Sur place (Espèces)',
       participantNumber: 4,
       status: 'WAITINGVALIDATION' as const,
-      languageId: 5,
-      placeId: 5,
+      languageCode: 'es',
+      placeKey: 'artlab',
       comment: 'Visite en famille',
       guideId: 444444,
       guideStatus: 'WAITING' as const,
     },
     {
-      id: 4,
       firstName: 'Hans',
       lastName: 'Weber',
       company: 'Universität Zürich',
@@ -370,14 +384,13 @@ async function main() {
       payment: 'Facture',
       participantNumber: 18,
       status: 'READY' as const,
-      languageId: 3,
-      placeId: 3,
+      languageCode: 'de',
+      placeKey: 'rolex-learning-center',
       comment: "Groupe d'étudiants en architecture",
       guideId: 555555,
       guideStatus: 'ACCEPTED' as const,
     },
     {
-      id: 5,
       firstName: 'Luigi',
       lastName: 'Bianchi',
       company: 'Politecnico di Milano',
@@ -393,14 +406,13 @@ async function main() {
       payment: 'Facture',
       participantNumber: 30,
       status: 'WAITINGGUIDE' as const,
-      languageId: 4,
-      placeId: 3,
+      languageCode: 'it',
+      placeKey: 'rolex-learning-center',
       comment: null,
       guideId: null,
       guideStatus: null,
     },
     {
-      id: 6,
       firstName: 'Sophie',
       lastName: 'Lambert',
       company: null,
@@ -416,14 +428,13 @@ async function main() {
       payment: 'Sur place (Carte)',
       participantNumber: 2,
       status: 'WAITINGVALIDATION' as const,
-      languageId: 1,
-      placeId: 6,
+      languageCode: 'fr',
+      placeKey: 'night-tour',
       comment: 'Visite en couple',
       guideId: 222222,
       guideStatus: 'WAITING' as const,
     },
     {
-      id: 7,
       firstName: 'Anna',
       lastName: 'Kowalski',
       company: 'Lycée International',
@@ -439,14 +450,13 @@ async function main() {
       payment: 'Facture',
       participantNumber: 22,
       status: 'WAITINGGUIDE' as const,
-      languageId: 2,
-      placeId: 1,
+      languageCode: 'en',
+      placeKey: 'campus-standard',
       comment: 'Échange scolaire',
       guideId: null,
       guideStatus: null,
     },
     {
-      id: 8,
       firstName: 'Pedro',
       lastName: 'Alves',
       company: null,
@@ -462,14 +472,13 @@ async function main() {
       payment: 'Sur place (Carte)',
       participantNumber: 6,
       status: 'READY' as const,
-      languageId: 6,
-      placeId: 4,
+      languageCode: 'pt',
+      placeKey: 'research-labs',
       comment: 'Visite déjà effectuée',
       guideId: 666666,
       guideStatus: 'ACCEPTED' as const,
     },
     {
-      id: 9,
       firstName: 'Emily',
       lastName: 'Clark',
       company: 'MIT',
@@ -485,14 +494,13 @@ async function main() {
       payment: 'Facture',
       participantNumber: 15,
       status: 'READY' as const,
-      languageId: 2,
-      placeId: 4,
+      languageCode: 'en',
+      placeKey: 'research-labs',
       comment: 'Délégation académique',
       guideId: 555555,
       guideStatus: 'ACCEPTED' as const,
     },
     {
-      id: 10,
       firstName: 'Lucas',
       lastName: 'Bernard',
       company: null,
@@ -508,14 +516,13 @@ async function main() {
       payment: 'Sur place (Espèces)',
       participantNumber: 1,
       status: 'WAITINGGUIDE' as const,
-      languageId: 1,
-      placeId: 5,
+      languageCode: 'fr',
+      placeKey: 'artlab',
       comment: null,
       guideId: null,
       guideStatus: null,
     },
     {
-      id: 11,
       firstName: 'Yuki',
       lastName: 'Tanaka',
       company: 'Tokyo Institute of Technology',
@@ -531,14 +538,13 @@ async function main() {
       payment: 'Facture',
       participantNumber: 20,
       status: 'WAITINGPAYMENT' as const,
-      languageId: 2,
-      placeId: 3,
+      languageCode: 'en',
+      placeKey: 'rolex-learning-center',
       comment: 'Partenariat de recherche',
       guideId: null,
       guideStatus: null,
     },
     {
-      id: 12,
       firstName: 'Chloé',
       lastName: 'Favre',
       company: 'Gymnase de Nyon',
@@ -554,8 +560,8 @@ async function main() {
       payment: 'Facture',
       participantNumber: 28,
       status: 'CANCELLED' as const,
-      languageId: 1,
-      placeId: 1,
+      languageCode: 'fr',
+      placeKey: 'campus-standard',
       comment: 'Visite annulée pour cause de grève',
       guideId: 111111,
       guideStatus: 'DECLINED' as const,
@@ -563,11 +569,13 @@ async function main() {
   ];
 
   for (const res of reservationsData) {
-    const { guideId, guideStatus, ...data } = res;
+    const { guideId, guideStatus, languageCode, placeKey, ...data } = res;
 
     await prisma.reservation.create({
       data: {
         ...data,
+        languageId: languageIdByCode[languageCode],
+        placeId: placeIdByKey[placeKey],
         ...(guideId
           ? {
             reservationGuides: {

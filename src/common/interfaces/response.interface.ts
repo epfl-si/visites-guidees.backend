@@ -6,3 +6,10 @@ export interface ApiError {
   timestamp: string;
   requestId: string;
 }
+
+export interface ApiSuccess<T> {
+  success: true;
+  data: T;
+  timestamp: string;
+  requestId: string;
+}

@@ -1,13 +1,13 @@
 import { Module } from '@nestjs/common';
-import { UserController } from './user.controller';
-import { UserService } from './user.service';
+import { GuideService } from './guide.service';
+import { GuideController } from './guide.controller';
 import { PrismaService } from '../prisma.service';
 import { AzureAdModule } from '../auth/azure-ad.module';
 import { ApiModule } from '../services/api/api.module';
 
 @Module({
   imports: [AzureAdModule, ApiModule],
-  controllers: [UserController],
-  providers: [UserService, PrismaService],
+  controllers: [GuideController],
+  providers: [GuideService, PrismaService],
 })
-export class UserModule {}
+export class GuideModule {}

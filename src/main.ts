@@ -4,6 +4,7 @@ import { WebpackHotModule } from './types/nestjs';
 import { ValidationPipe, VersioningType } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
+import { TransformInterceptor } from './common/interceptors/transform.interceptor';
 
 declare const module: WebpackHotModule;
 
@@ -11,8 +12,11 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   app.enableVersioning({ type: VersioningType.URI });
-  app.useGlobalPipes(new ValidationPipe());
+  app.useGlobalPipes(
+    new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }),
+  );
   app.useGlobalFilters(new HttpExceptionFilter());
+  app.useGlobalInterceptors(new TransformInterceptor());
 
   const config = new DocumentBuilder()
     .setTitle('Guided Tours API')

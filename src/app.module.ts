@@ -5,6 +5,7 @@ import { ReservationModule } from './reservation/reservation.module';
 import { UserModule } from './user/user.module';
 import { PlaceModule } from './place/place.module';
 import { RequestIdMiddleware } from './common/middleware/request-id.middleware';
+import { GuideModule } from './guide/guide.module';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { RequestIdMiddleware } from './common/middleware/request-id.middleware';
     ReservationModule,
     UserModule,
     PlaceModule,
+    GuideModule,
   ],
   controllers: [],
   providers: [],

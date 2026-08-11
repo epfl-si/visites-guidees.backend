@@ -47,7 +47,7 @@ export class CreateReservationDto {
   city!: string;
 
   @ApiProperty()
-  @IsNumber()
+  @IsString()
   @IsNotEmpty()
   zip!: string;
 
