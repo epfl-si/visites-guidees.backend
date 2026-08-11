@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
 import { Prisma } from '../../generated/prisma/client';
+import Holidays from 'date-holidays';
 import { CreateReservationDto } from './dto/create.dto';
 import { UpdateReservationDto } from './dto/update.dto';
 import { ListReservationDto } from './dto/list.dto';
@@ -14,8 +15,35 @@ import { AppLogger as Logger } from '@/logger.service';
 @Injectable()
 export class ReservationService {
   private readonly logger = new Logger(ReservationService.name);
+  private readonly holidays = new Holidays('CH', 'VD');
 
   constructor(private prisma: PrismaService) {}
+
+  private isAtLeast7BusinessDaysBefore(visitDate: Date | string): boolean {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const visit = new Date(visitDate);
+    visit.setHours(0, 0, 0, 0);
+
+    if (today >= visit) {
+      return false;
+    }
+
+    let businessDays = 0;
+    const current = new Date(today);
+
+    while (current < visit && businessDays < 7) {
+      current.setDate(current.getDate() + 1);
+      const isWeekend = current.getDay() === 0 || current.getDay() === 6;
+
+      if (!isWeekend && !this.holidays.isHoliday(current)) {
+        businessDays++;
+      }
+    }
+
+    return businessDays >= 7;
+  }
 
   async list(
     order: Prisma.SortOrder = Prisma.SortOrder.desc,
@@ -66,6 +94,14 @@ export class ReservationService {
       throw new UnprocessableEntityException('GDPR consent must be accepted.');
     }
 
+    const visitDate = new Date(date);
+
+    if (!this.isAtLeast7BusinessDaysBefore(visitDate)) {
+      throw new UnprocessableEntityException(
+        'The visit date must be at least 7 business days before.',
+      );
+    }
+
     const language = await this.prisma.language.findUnique({
       where: { id: rest.languageId },
     });
@@ -90,7 +126,7 @@ export class ReservationService {
       data: {
         ...rest,
         region: region ?? '',
-        date: new Date(date),
+        date: visitDate,
         payment: '',
         status: 'WAITINGGUIDE',
       },
