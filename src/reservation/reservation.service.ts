@@ -63,6 +63,26 @@ export class ReservationService {
       throw new UnprocessableEntityException('GDPR consent must be accepted.');
     }
 
+    const language = await this.prisma.language.findUnique({
+      where: { id: createReservationDto.languageId },
+    });
+
+    if (!language) {
+      const message = `No language found with id ${createReservationDto.languageId}`;
+      this.logger.warn(message);
+      throw new NotFoundException(message);
+    }
+
+    const place = await this.prisma.place.findUnique({
+      where: { id: createReservationDto.placeId },
+    });
+
+    if (!place) {
+      const message = `No place found with id ${createReservationDto.placeId}`;
+      this.logger.warn(message);
+      throw new NotFoundException(message);
+    }
+
     const reservation = await this.prisma.reservation.create({
       data: {
         firstName: createReservationDto.firstName,
