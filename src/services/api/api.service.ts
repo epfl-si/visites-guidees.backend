@@ -61,9 +61,15 @@ export class ApiService {
       throw new InternalServerErrorException('EPFL API is not configured');
     }
 
-    const headers = new Headers(options.headers);
+    const headers = new Headers();
     headers.set('authorization', this.epflAuthHeader);
     headers.set('accept', 'application/json');
+
+    if (options.headers) {
+      new Headers(options.headers).forEach((value, key) => {
+        headers.set(key, value);
+      });
+    }
 
     return this.call<T>(`${this.epflApiUrl}${endpoint}`, {
       ...options,
