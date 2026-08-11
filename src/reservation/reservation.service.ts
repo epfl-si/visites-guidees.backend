@@ -99,9 +99,7 @@ export class ReservationService {
       throw new UnprocessableEntityException('GDPR consent must be accepted.');
     }
 
-    const visitDate = new Date(date);
-
-    if (!this.isAtLeast7BusinessDaysBefore(visitDate)) {
+    if (!this.isAtLeast7BusinessDaysBefore(date)) {
       throw new UnprocessableEntityException(
         'The visit date must be at least 7 business days before.',
       );
@@ -130,7 +128,7 @@ export class ReservationService {
     const reservation = await this.prisma.reservation.create({
       data: {
         ...rest,
-        date: visitDate,
+        date: new Date(date),
         payment: '',
         status: 'WAITINGGUIDE',
       },
