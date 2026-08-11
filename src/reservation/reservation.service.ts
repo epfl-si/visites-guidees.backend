@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Injectable,
   NotFoundException,
   UnprocessableEntityException,
@@ -49,6 +50,10 @@ export class ReservationService {
     order: Prisma.SortOrder = Prisma.SortOrder.desc,
     limit?: number,
   ): Promise<ListReservationDto[]> {
+    if (limit !== undefined && limit < 1) {
+      throw new BadRequestException('limit must be a positive integer.');
+    }
+
     const reservations = await this.prisma.reservation.findMany({
       where: { status: { not: 'CANCELLED' } },
       select: {
@@ -59,7 +64,7 @@ export class ReservationService {
         status: true,
       },
       orderBy: { createdAt: order },
-      ...(limit && { take: limit }),
+      ...(limit !== undefined && { take: limit }),
     });
 
     if (reservations.length === 0) {
@@ -88,7 +93,7 @@ export class ReservationService {
   async create(
     createReservationDto: CreateReservationDto,
   ): Promise<ReadReservationDto> {
-    const { gdprConsent, date, region, ...rest } = createReservationDto;
+    const { gdprConsent, date, ...rest } = createReservationDto;
 
     if (!gdprConsent) {
       throw new UnprocessableEntityException('GDPR consent must be accepted.');
@@ -125,7 +130,6 @@ export class ReservationService {
     const reservation = await this.prisma.reservation.create({
       data: {
         ...rest,
-        region: region ?? '',
         date: visitDate,
         payment: '',
         status: 'WAITINGGUIDE',

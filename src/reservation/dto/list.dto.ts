@@ -2,6 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import {
   IsString,
   IsNumber,
+  IsNotEmpty,
   IsOptional,
   IsDate,
   IsEnum,
@@ -20,6 +21,7 @@ export class ListReservationDto {
 
   @ApiProperty()
   @IsString()
+  @IsNotEmpty()
   email!: string;
 
   @ApiProperty()
