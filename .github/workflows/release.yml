@@ -1,0 +1,61 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - package.json
+
+jobs:
+  detect-version:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      version: ${{ steps.get_version.outputs.version }}
+      should_release: ${{ steps.check.outputs.should_release }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Get version
+        id: get_version
+        run: |
+          VERSION=$(jq -r .version package.json)
+          [ "$VERSION" = "null" ] && echo "Cannot find a version in package.json" && exit 1
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Check if release exists
+        id: check
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release view "v${{ steps.get_version.outputs.version }}" >/dev/null 2>&1 \
+            && echo "should_release=false" >> $GITHUB_OUTPUT \
+            || echo "should_release=true" >> $GITHUB_OUTPUT
+
+  build:
+    needs: [detect-version]
+    if: needs.detect-version.outputs.should_release == 'true'
+    uses: ./.github/workflows/build.yml
+    with:
+      tag: ${{ needs.detect-version.outputs.version }}
+
+  create-release:
+    needs: [detect-version, build]
+    if: needs.build.outputs.build_success == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Create release
+        uses: dwesh163/actions/release@main
+        with:
+          version: ${{ needs.detect-version.outputs.version }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
