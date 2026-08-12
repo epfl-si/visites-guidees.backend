@@ -60,6 +60,9 @@ jobs:
           docker tag backend $IMAGE_ID:$TAG
           docker push $IMAGE_ID:$TAG
 
+          docker tag backend $IMAGE_ID:latest
+          docker push $IMAGE_ID:latest
+
       - name: Build success
         id: result
         run: echo "success=true" >> $GITHUB_OUTPUT
