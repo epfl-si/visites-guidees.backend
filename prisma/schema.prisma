@@ -37,6 +37,7 @@ model Guide {
   reservationGuides ReservationGuide[]
   languages         Language[]
   blockedPeriods    BlockedPeriod[]
+  places            Place[]
 
   @@map("guides")
 }
@@ -111,6 +112,7 @@ model Place {
   reservations   Reservation[]
   languages      Language[]
   blockedPeriods BlockedPeriod[]
+  guides         Guide[]
 
   @@map("places")
 }
