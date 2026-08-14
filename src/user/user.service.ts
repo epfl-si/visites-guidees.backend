@@ -25,8 +25,9 @@ export class UserService {
       firstName: Req.given_name,
       lastName: Req.family_name,
       mail: Req.mail,
-      isAdmin: Req.groups.includes('visites-guidees-admins_AppGrpU'),
-      isGuide: guide ? true : false,
+      roles: [
+        Req.groups.includes('visites-guidees-admins_AppGrpU') ? "admin" : "",
+        guide ? "guide" : ""]
     };
     return data;
   }

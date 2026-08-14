@@ -31,6 +31,5 @@ export interface UserInfo {
   firstName: string;
   lastName: string;
   mail: string;
-  isAdmin: boolean;
-  isGuide: boolean;
+  roles: string[]
 }
