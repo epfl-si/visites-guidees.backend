@@ -9,5 +9,6 @@ import { ApiModule } from '../services/api/api.module';
   imports: [AzureAdModule, ApiModule],
   controllers: [GuideController],
   providers: [GuideService, PrismaService],
+  exports: [GuideService],
 })
 export class GuideModule {}

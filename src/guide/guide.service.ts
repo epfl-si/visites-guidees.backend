@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
 import { Prisma } from '../../generated/prisma/client';
 import { ListGuideDto } from './dto/list.dto';
@@ -155,5 +159,33 @@ export class GuideService {
       }
       throw error;
     }
+  }
+
+  async findGuideForReservation(id: number) {
+    const reservation = await this.prisma.reservation.findUnique({
+      where: { id },
+      include: { language: true },
+    });
+
+    if (!reservation) {
+      throw new InternalServerErrorException();
+    }
+
+    const guides = await this.prisma.guide.findMany({
+      where: {
+        status: 'ACTIVE',
+        languages: { some: { id: reservation?.language.id } },
+        blockedPeriods: {
+          none: {
+            start: { lte: reservation?.date },
+            end: { gte: reservation?.date },
+          },
+        },
+        places: { some: { id: reservation?.placeId } },
+      },
+      select: { id: true },
+    });
+
+    return guides.map((g) => g.id);
   }
 }

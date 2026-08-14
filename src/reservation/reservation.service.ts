@@ -12,13 +12,19 @@ import { UpdateReservationDto } from './dto/update.dto';
 import { ListReservationDto } from './dto/list.dto';
 import { ReadReservationDto } from './dto/read.dto';
 import { AppLogger as Logger } from '@/logger.service';
+import { GuideService } from '@/guide/guide.service';
+import { MailService } from '@/mail/mail.service';
 
 @Injectable()
 export class ReservationService {
   private readonly logger = new Logger(ReservationService.name);
   private readonly holidays = new Holidays('CH', 'VD');
 
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private guide: GuideService,
+    private mail: MailService,
+  ) { }
 
   private isAtLeast7BusinessDaysBefore(visitDate: Date | string): boolean {
     const today = new Date();
@@ -135,6 +141,20 @@ export class ReservationService {
     });
 
     this.logger.log(`Created reservation ${reservation.id}`);
+
+    const compatibleGuidesIds = await this.guide.findGuideForReservation(
+      reservation.id,
+    );
+
+    this.mail.notifyGuide(compatibleGuidesIds, {
+      url: process.env.FRONTEND_URL + `/reservations/${reservation.id}`,
+      date: reservation.date,
+      language: language.name,
+      place: (place.title as { fr: string }).fr,
+      numberOfGuide: Math.ceil(reservation.participantNumber / place.capacity),
+      participantsNumber: reservation.participantNumber,
+    });
+
     return reservation;
   }
 
