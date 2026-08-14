@@ -1,3 +1,9 @@
+// ============================================
+// READ BEFORE SEEDING
+// ============================================
+const your_email_user = '' // your email adress exmaple : bob.dupont
+const domain = 'epfl.ch'
+
 import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient } from '../generated/prisma/client';
 
@@ -178,10 +184,10 @@ async function main() {
       status: 'ACTIVE' as const,
       phone: ['+41 21 693 11 11'],
       languageCodes: ['fr', 'en'],
+      placeKeys: ['campus-standard', 'architecture-tour', 'night-tour'],
       user: {
         firstName: 'Alice',
         lastName: 'Martin',
-        email: 'alice.martin@epfl.ch',
         username: 'amartin',
       },
     },
@@ -190,10 +196,10 @@ async function main() {
       status: 'ACTIVE' as const,
       phone: ['+41 21 693 22 22'],
       languageCodes: ['fr', 'en', 'de'],
+      placeKeys: ['campus-standard', 'rolex-learning-center', 'night-tour'],
       user: {
         firstName: 'Bob',
         lastName: 'Dupont',
-        email: 'bob.dupont@epfl.ch',
         username: 'bdupont',
       },
     },
@@ -202,10 +208,10 @@ async function main() {
       status: 'ACTIVE' as const,
       phone: ['+41 21 693 33 33'],
       languageCodes: ['fr', 'it'],
+      placeKeys: ['rolex-learning-center', 'artlab'],
       user: {
         firstName: 'Chiara',
         lastName: 'Rossi',
-        email: 'chiara.rossi@epfl.ch',
         username: 'crossi',
       },
     },
@@ -214,10 +220,10 @@ async function main() {
       status: 'INACTIVE' as const,
       phone: ['+41 21 693 44 44'],
       languageCodes: ['fr', 'en', 'es'],
+      placeKeys: ['artlab', 'research-labs'],
       user: {
         firstName: 'David',
         lastName: 'Fernandez',
-        email: 'david.fernandez@epfl.ch',
         username: 'dfernandez',
       },
     },
@@ -226,10 +232,10 @@ async function main() {
       status: 'ACTIVE' as const,
       phone: ['+41 21 693 55 55'],
       languageCodes: ['en', 'de'],
+      placeKeys: ['rolex-learning-center', 'research-labs', 'campus-standard'],
       user: {
         firstName: 'Emma',
         lastName: 'Müller',
-        email: 'emma.muller@epfl.ch',
         username: 'emuller',
       },
     },
@@ -238,24 +244,24 @@ async function main() {
       status: 'RETIRED' as const,
       phone: ['+41 21 693 66 66'],
       languageCodes: ['fr', 'en', 'de', 'it', 'es', 'pt'],
+      placeKeys: ['artlab', 'research-labs', 'rolex-learning-center', 'campus-standard', 'architecture-tour', 'night-tour'],
       user: {
         firstName: 'Fabio',
         lastName: 'Pereira',
-        email: 'fabio.pereira@epfl.ch',
         username: 'fpereira',
       },
     },
   ];
-
+  let i = 0
   for (const guide of guidesData) {
-    const { languageCodes, user, id, status, phone } = guide;
+    const { languageCodes, placeKeys, user, id, status, phone } = guide;
 
     await prisma.user.create({
       data: {
         id,
         firstName: user.firstName,
         lastName: user.lastName,
-        email: user.email,
+        email: your_email_user + `+${i}@` + domain,
         username: user.username,
       },
     });
@@ -268,8 +274,12 @@ async function main() {
         languages: {
           connect: languageCodes.map((code) => ({ id: languageIdByCode[code] })),
         },
+        places: {
+          connect: placeKeys.map((key) => ({ id: placeIdByKey[key] })),
+        },
       },
     });
+    i += 1
   }
 
   // ============================================
