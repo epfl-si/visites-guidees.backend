@@ -146,7 +146,7 @@ export class ReservationService {
       reservation.id,
     );
 
-    this.mail.notifyGuide(compatibleGuidesIds, {
+    await this.mail.notifyGuide(compatibleGuidesIds, {
       url: process.env.FRONTEND_URL + `/reservations/${reservation.id}`,
       date: reservation.date,
       language: language.name,
