@@ -8,7 +8,7 @@ export default function Preview() {
     place: 'Visite du rolex',
     language: 'Français',
     numberOfGuide: 2,
-    participantsCount: 21,
+    participantsNumber: 21,
     url: 'http://localhost:5173/something',
   };
   return <MediacomValidationMail data={data} />;

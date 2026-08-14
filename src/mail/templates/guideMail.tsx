@@ -34,11 +34,7 @@ const textStyle = {
   color: '#333333',
 };
 
-export default function VisitGuideeEmail({
-  data,
-}: {
-  data: guideNotification;
-}) {
+export function VisitGuideEmail({ data }: { data: guideNotification }) {
   const details = [
     { label: 'La langue souhaitée : ', content: data.language },
     {
@@ -145,27 +141,14 @@ export default function VisitGuideeEmail({
 
 const main = {
   backgroundColor: colors.white,
-  fontFamily: "'Inter', Arial, Helvetica, sans-serif",
-  padding: '40px',
+  fontFamily: 'Arial, Helvetica, sans-serif',
   boxSizing: 'border-box' as const,
-  display: 'flex',
-  justifyContent: 'center',
-  alignItems: 'center',
-  minHeight: '100vh',
 };
 
 const container = {
   maxWidth: '680px',
   margin: '0 auto',
-  padding: '0 32px',
-};
-
-const wordmark = {
-  fontSize: '32px',
-  fontWeight: 700,
-  color: colors.black,
-  letterSpacing: '0.5px',
-  margin: 0,
+  padding: '0px',
 };
 
 const title = {
