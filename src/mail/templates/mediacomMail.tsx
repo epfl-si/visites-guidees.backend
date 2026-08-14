@@ -28,12 +28,6 @@ const colors = {
   white: '#FFFFFF',
 };
 
-const textStyle = {
-  fontFamily: 'Arial, sans-serif',
-  fontSize: '14px',
-  color: '#333333',
-};
-
 export default function mediacomValidationMail({
   data,
 }: {
@@ -156,13 +150,8 @@ export default function mediacomValidationMail({
 
 const main = {
   backgroundColor: colors.white,
-  fontFamily: "'Inter', Arial, Helvetica, sans-serif",
-  padding: '40px',
+  fontFamily: 'Arial, Helvetica, sans-serif',
   boxSizing: 'border-box' as const,
-  display: 'flex',
-  justifyContent: 'center',
-  alignItems: 'center',
-  minHeight: '100vh',
 };
 
 const container = {

@@ -8,6 +8,6 @@ export interface mediacomValidation {
   date: Date;
   numberOfGuide: number,
   language: string,
-  participantsCount: number,
+  participantsNumber: number,
   url: string
 }

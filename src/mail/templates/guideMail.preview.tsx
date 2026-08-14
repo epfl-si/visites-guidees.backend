@@ -1,5 +1,5 @@
 import { guideNotification } from '../interfaces/guideNotification.interface';
-import VisitGuideeEmail from './guideMail';
+import { VisitGuideEmail } from './guideMail';
 
 export default function Preview() {
   const data: guideNotification = {
@@ -8,8 +8,8 @@ export default function Preview() {
     place: 'Visite du rolex',
     language: 'Français',
     numberOfGuide: 2,
-    participantsCount: 21,
+    participantsNumber: 21,
     url: 'http://localhost:5173/something',
   };
-  return <VisitGuideeEmail data={data} />;
+  return <VisitGuideEmail data={data} />;
 }

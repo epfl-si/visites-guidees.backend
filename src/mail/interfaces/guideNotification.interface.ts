@@ -7,6 +7,6 @@ export interface guideNotification {
   date: Date;
   numberOfGuide: number,
   language: string,
-  participantsCount: number,
+  participantsNumber: number,
   url: string
 }
