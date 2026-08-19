@@ -19,15 +19,20 @@ export class UserService {
       },
     });
 
+    const ADMIN_GROUP = 'visites-guidees-admins_AppGrpU';
+
+    const roles = [
+      Req.groups.includes(ADMIN_GROUP) && "admin",
+      guide && "guide"
+    ].filter((role): role is string => Boolean(role));
+
     const data: UserInfo = {
       sciper: Number(Req.uniqueid),
       gaspar: Req.gaspar,
       firstName: Req.given_name,
       lastName: Req.family_name,
       mail: Req.mail,
-      roles: [
-        Req.groups.includes('visites-guidees-admins_AppGrpU') ? "admin" : "",
-        guide ? "guide" : ""]
+      roles: roles,
     };
     return data;
   }
