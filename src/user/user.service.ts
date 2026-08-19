@@ -28,7 +28,7 @@ export class UserService {
 
     const data: UserInfo = {
       sciper: Number(Req.uniqueid),
-      gaspar: Req.gaspar,
+      username: Req.gaspar,
       firstName: Req.given_name,
       lastName: Req.family_name,
       mail: Req.mail,
