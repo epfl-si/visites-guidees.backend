@@ -27,10 +27,9 @@ export interface ReqEntraOauthUser {
 
 export interface UserInfo {
   sciper: number;
-  gaspar: string;
+  username: string;
   firstName: string;
   lastName: string;
   mail: string;
-  isAdmin: boolean;
-  isGuide: boolean;
+  roles: string[]
 }
