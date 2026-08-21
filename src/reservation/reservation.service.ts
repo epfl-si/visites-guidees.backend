@@ -79,6 +79,19 @@ export class ReservationService {
   async read(id: number): Promise<ReadReservationDto> {
     const reservation = await this.prisma.reservation.findUnique({
       where: { id },
+      include: {
+        language: true,
+        place: true,
+        reservationGuides: {
+          select: {
+            guide: {
+              include: {
+                user: true,
+              },
+            },
+          },
+        },
+      },
     });
 
     if (!reservation) {
