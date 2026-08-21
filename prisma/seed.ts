@@ -1,7 +1,7 @@
 // ============================================
 // READ BEFORE SEEDING
 // ============================================
-const your_email_user = '' // your email adress exmaple : bob.dupont
+const your_email_user = 'menelik.sigrist' // your email adress exmaple : bob.dupont
 const domain = 'epfl.ch'
 
 import { PrismaPg } from '@prisma/adapter-pg';
