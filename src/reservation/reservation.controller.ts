@@ -14,7 +14,7 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiResponse } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiParam, ApiResponse } from '@nestjs/swagger';
 import { CreateReservationDto } from './dto/create.dto';
 import { UpdateReservationDto } from './dto/update.dto';
 import { ListReservationDto } from './dto/list.dto';
@@ -22,11 +22,15 @@ import { ReadReservationDto } from './dto/read.dto';
 import { Prisma } from '../../generated/prisma/client';
 import { AzureAdGuard } from '../auth/azure-ad-auth.guard';
 import { GroupsGuard } from '../guards/groups.guard';
+import { GuideGuard } from '../guards/guide.guard';
 import { RequireGroups } from '../decorators/require-groups.decorator';
+import { CurrentUser } from '../decorators/current-user.decorator';
+import type { ReqEntraOauthUser } from '../types/auth';
+import { ReservationGuideAction } from './reservation-guide-action.enum';
 
 @Controller({ path: 'reservations', version: '1' })
 export class ReservationController {
-  constructor(private readonly reservationService: ReservationService) {}
+  constructor(private readonly reservationService: ReservationService) { }
 
   @Get()
   @ApiResponse({ type: [ListReservationDto] })
@@ -68,6 +72,23 @@ export class ReservationController {
     @Body() updateReservationDto: UpdateReservationDto,
   ): Promise<ReadReservationDto> {
     return this.reservationService.update(id, updateReservationDto);
+  }
+
+  @Post(':id/:action')
+  @ApiParam({ name: 'action', enum: ReservationGuideAction })
+  @UseGuards(AzureAdGuard, GuideGuard)
+  @ApiBearerAuth('access-token')
+  respond(
+    @Param('id', ParseIntPipe) id: number,
+    @Param('action', new ParseEnumPipe(ReservationGuideAction))
+    action: ReservationGuideAction,
+    @CurrentUser() user: ReqEntraOauthUser,
+  ): Promise<void> {
+    return this.reservationService.respondToInvitation(
+      id,
+      action,
+      Number(user.uniqueid),
+    );
   }
 
   @Delete(':id')

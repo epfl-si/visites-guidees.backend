@@ -14,6 +14,7 @@ import { ReadReservationDto } from './dto/read.dto';
 import { AppLogger as Logger } from '@/logger.service';
 import { GuideService } from '@/guide/guide.service';
 import { MailService } from '@/mail/mail.service';
+import { ReservationGuideAction } from './reservation-guide-action.enum';
 
 @Injectable()
 export class ReservationService {
@@ -50,6 +51,19 @@ export class ReservationService {
     }
 
     return businessDays >= 7;
+  }
+
+  private async createGuideToReservation(
+    idReservation: number,
+    guideIds: number[],
+  ) {
+    await this.prisma.reservationGuide.createMany({
+      data: guideIds.map((guideId) => ({
+        guideId,
+        status: 'WAITING',
+        reservationId: idReservation,
+      })),
+    });
   }
 
   async list(
@@ -146,6 +160,8 @@ export class ReservationService {
       reservation.id,
     );
 
+    await this.createGuideToReservation(reservation.id, compatibleGuidesIds);
+
     await this.mail.notifyGuide(compatibleGuidesIds, {
       url: process.env.FRONTEND_URL + `/reservations/${reservation.id}`,
       date: reservation.date,
@@ -180,6 +196,35 @@ export class ReservationService {
       }
       throw error;
     }
+  }
+
+  async respondToInvitation(
+    id: number,
+    action: ReservationGuideAction,
+    sciper: number,
+  ) {
+    const status = action === ReservationGuideAction.ACCEPT ? 'ACCEPTED' : 'DECLINED';
+
+    try {
+      await this.prisma.reservationGuide.update({
+        where: { reservationId_guideId: { reservationId: id, guideId: sciper } },
+        data: { status, updatedAt: new Date() },
+      });
+    } catch (error) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2025'
+      ) {
+        throw new NotFoundException(
+          `No invitation found for guide ${sciper} on reservation ${id}`,
+        );
+      }
+      throw error;
+    }
+
+    this.logger.log(`Reservation ${id} ${status.toLowerCase()} by guide ${sciper}`);
+
+    return
   }
 
   async remove(id: number): Promise<void> {
