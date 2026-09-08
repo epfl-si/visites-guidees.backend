@@ -11,6 +11,7 @@ import { CreateReservationDto } from './dto/create.dto';
 import { UpdateReservationDto } from './dto/update.dto';
 import { ListReservationDto } from './dto/list.dto';
 import { ReadReservationDto } from './dto/read.dto';
+import { GuideInvitationDto } from './dto/guide-invitation.dto';
 import { AppLogger as Logger } from '@/logger.service';
 import { GuideService } from '@/guide/guide.service';
 import { MailService } from '@/mail/mail.service';
@@ -196,6 +197,38 @@ export class ReservationService {
       }
       throw error;
     }
+  }
+
+  private static readonly invitationSelect = {
+    reservationId: true,
+    status: true,
+    reservation: {
+      select: {
+        date: true,
+        participantNumber: true,
+        comment: true,
+        language: { select: { id: true, name: true } },
+        place: { select: { id: true, title: true } },
+      },
+    },
+  } satisfies Prisma.ReservationGuideSelect;
+
+  async getGuideInvitation(
+    id: number,
+    sciper: number,
+  ): Promise<GuideInvitationDto> {
+    const invitation = await this.prisma.reservationGuide.findUnique({
+      where: { reservationId_guideId: { reservationId: id, guideId: sciper } },
+      select: ReservationService.invitationSelect,
+    });
+    if (!invitation) {
+      this.logger.warn(`No invitation for guide ${sciper} on reservation ${id}`);
+      throw new NotFoundException(
+        `No invitation found for guide ${sciper} on reservation ${id}`,
+      );
+    }
+
+    return invitation as GuideInvitationDto;
   }
 
   async respondToInvitation(

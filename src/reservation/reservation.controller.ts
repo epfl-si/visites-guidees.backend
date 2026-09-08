@@ -27,6 +27,7 @@ import { RequireGroups } from '../decorators/require-groups.decorator';
 import { CurrentUser } from '../decorators/current-user.decorator';
 import type { ReqEntraOauthUser } from '../types/auth';
 import { ReservationGuideAction } from './reservation-guide-action.enum';
+import { GuideInvitationDto } from './dto/guide-invitation.dto';
 
 @Controller({ path: 'reservations', version: '1' })
 export class ReservationController {
@@ -72,6 +73,20 @@ export class ReservationController {
     @Body() updateReservationDto: UpdateReservationDto,
   ): Promise<ReadReservationDto> {
     return this.reservationService.update(id, updateReservationDto);
+  }
+
+  @Get(':id/invitation')
+  @ApiResponse({ type: GuideInvitationDto })
+  @UseGuards(AzureAdGuard, GuideGuard)
+  @ApiBearerAuth('access-token')
+  getGuideInvitation(
+    @Param('id', ParseIntPipe) id: number,
+    @CurrentUser() user: ReqEntraOauthUser,
+  ): Promise<GuideInvitationDto> {
+    return this.reservationService.getGuideInvitation(
+      id,
+      Number(user.uniqueid),
+    );
   }
 
   @Post(':id/:action')
