@@ -16,6 +16,8 @@ import { AppLogger as Logger } from '@/logger.service';
 import { GuideService } from '@/guide/guide.service';
 import { MailService } from '@/mail/mail.service';
 import { ReservationGuideAction } from './reservation-guide-action.enum';
+import { ReqEntraOauthUser } from '@/types/auth';
+import { adminGroup } from '@/constant/auth';
 
 @Injectable()
 export class ReservationService {
@@ -97,9 +99,20 @@ export class ReservationService {
     return reservations;
   }
 
-  async read(id: number): Promise<ReadReservationDto> {
-    const reservation = await this.prisma.reservation.findUnique({
-      where: { id },
+  async read(id: number, user: ReqEntraOauthUser): Promise<ReadReservationDto> {
+    const isAdmin = user.groups.includes(adminGroup);
+
+    const reservation = await this.prisma.reservation.findFirst({
+      where: isAdmin
+        ? { id }
+        : {
+          id, reservationGuides: {
+            some: {
+              guideId: Number(user.uniqueid)
+            }
+          }
+        },
+      include: { reservationGuides: true },
     });
 
     if (!reservation) {
