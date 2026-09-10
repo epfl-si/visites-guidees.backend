@@ -240,7 +240,9 @@ export class ReservationService {
 
     try {
       await this.prisma.reservationGuide.update({
-        where: { reservationId_guideId: { reservationId: id, guideId: sciper } },
+        where: {
+          reservationId_guideId: { reservationId: id, guideId: sciper }, status: { not: 'CHOSEN' }
+        },
         data: { status, updatedAt: new Date() },
       });
     } catch (error) {
