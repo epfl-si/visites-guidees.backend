@@ -1,0 +1,1 @@
+export const adminGroup = 'visites-guidees-admins_AppGrpU' as const;

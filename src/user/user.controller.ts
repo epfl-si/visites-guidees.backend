@@ -6,6 +6,8 @@ import { UserService } from './user.service';
 import { ReqEntraOauthUser } from '../types/auth';
 import { GroupsGuard } from '@/guards/groups.guard';
 import { RequireGroups } from '@/decorators/require-groups.decorator';
+import { adminGroup } from '@/constant/auth';
+
 @Controller({ path: 'users', version: '1' })
 export class UserController {
   constructor(private readonly userService: UserService) { }
@@ -17,7 +19,7 @@ export class UserController {
   }
 
   @UseGuards(AzureAdGuard, GroupsGuard)
-  @RequireGroups('visites-guidees-admins_AppGrpU')
+  @RequireGroups(adminGroup)
   @Get('search')
   searchUsers(@Query('query') query: string) {
     return this.userService.search(query);

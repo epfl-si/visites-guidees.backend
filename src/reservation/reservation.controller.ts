@@ -28,6 +28,7 @@ import { CurrentUser } from '../decorators/current-user.decorator';
 import type { ReqEntraOauthUser } from '../types/auth';
 import { ReservationGuideAction } from './reservation-guide-action.enum';
 import { GuideInvitationDto } from './dto/guide-invitation.dto';
+import { adminGroup } from '@/constant/auth';
 
 @Controller({ path: 'reservations', version: '1' })
 export class ReservationController {
@@ -36,7 +37,7 @@ export class ReservationController {
   @Get()
   @ApiResponse({ type: [ListReservationDto] })
   @UseGuards(AzureAdGuard, GroupsGuard)
-  @RequireGroups('visites-guidees-admins_AppGrpU')
+  @RequireGroups(adminGroup)
   @ApiBearerAuth('access-token')
   list(
     @Query('order', new ParseEnumPipe(Prisma.SortOrder, { optional: true }))
@@ -49,10 +50,11 @@ export class ReservationController {
   @Get(':id')
   @ApiResponse({ type: ReadReservationDto })
   @UseGuards(AzureAdGuard, GroupsGuard)
-  @RequireGroups('visites-guidees-admins_AppGrpU')
   @ApiBearerAuth('access-token')
-  read(@Param('id', ParseIntPipe) id: number): Promise<ReadReservationDto> {
-    return this.reservationService.read(id);
+  read(@Param('id', ParseIntPipe) id: number,
+    @CurrentUser() user: ReqEntraOauthUser,
+  ): Promise<ReadReservationDto> {
+    return this.reservationService.read(id, user);
   }
 
   @Post()
@@ -66,7 +68,7 @@ export class ReservationController {
   @Patch(':id')
   @ApiResponse({ type: ReadReservationDto })
   @UseGuards(AzureAdGuard, GroupsGuard)
-  @RequireGroups('visites-guidees-admins_AppGrpU')
+  @RequireGroups(adminGroup)
   @ApiBearerAuth('access-token')
   update(
     @Param('id', ParseIntPipe) id: number,
@@ -109,7 +111,7 @@ export class ReservationController {
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   @UseGuards(AzureAdGuard, GroupsGuard)
-  @RequireGroups('visites-guidees-admins_AppGrpU')
+  @RequireGroups(adminGroup)
   @ApiBearerAuth('access-token')
   remove(@Param('id', ParseIntPipe) id: number): Promise<void> {
     return this.reservationService.remove(id);

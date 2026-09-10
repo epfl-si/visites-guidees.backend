@@ -18,15 +18,16 @@ import { ReadGuideDto } from './dto/read.dto';
 import { AzureAdGuard } from '../auth/azure-ad-auth.guard';
 import { GroupsGuard } from '../guards/groups.guard';
 import { RequireGroups } from '../decorators/require-groups.decorator';
+import { adminGroup } from '@/constant/auth';
 
 @Controller({ path: 'guides', version: '1' })
 export class GuideController {
-  constructor(private readonly guideService: GuideService) {}
+  constructor(private readonly guideService: GuideService) { }
 
   @Get()
   @ApiResponse({ type: [ListGuideDto] })
   @UseGuards(AzureAdGuard, GroupsGuard)
-  @RequireGroups('visites-guidees-admins_AppGrpU')
+  @RequireGroups(adminGroup)
   @ApiBearerAuth('access-token')
   list(): Promise<ListGuideDto[]> {
     return this.guideService.list();
@@ -35,7 +36,7 @@ export class GuideController {
   @Get(':id')
   @ApiResponse({ type: ReadGuideDto })
   @UseGuards(AzureAdGuard, GroupsGuard)
-  @RequireGroups('visites-guidees-admins_AppGrpU')
+  @RequireGroups(adminGroup)
   @ApiBearerAuth('access-token')
   read(@Param('id', ParseIntPipe) id: number): Promise<ReadGuideDto> {
     return this.guideService.read(id);
@@ -44,7 +45,7 @@ export class GuideController {
   @Post()
   @ApiResponse({ type: ReadGuideDto })
   @UseGuards(AzureAdGuard, GroupsGuard)
-  @RequireGroups('visites-guidees-admins_AppGrpU')
+  @RequireGroups(adminGroup)
   @ApiBearerAuth('access-token')
   create(@Body() createGuideDto: CreateGuideDto): Promise<ReadGuideDto> {
     return this.guideService.create(createGuideDto);
@@ -53,7 +54,7 @@ export class GuideController {
   @Patch(':id')
   @ApiResponse({ type: ReadGuideDto })
   @UseGuards(AzureAdGuard, GroupsGuard)
-  @RequireGroups('visites-guidees-admins_AppGrpU')
+  @RequireGroups(adminGroup)
   @ApiBearerAuth('access-token')
   update(
     @Param('id', ParseIntPipe) id: number,
@@ -64,7 +65,7 @@ export class GuideController {
 
   @Delete(':id')
   @UseGuards(AzureAdGuard, GroupsGuard)
-  @RequireGroups('visites-guidees-admins_AppGrpU')
+  @RequireGroups(adminGroup)
   @ApiBearerAuth('access-token')
   remove(@Param('id', ParseIntPipe) id: number): Promise<void> {
     return this.guideService.remove(id);
