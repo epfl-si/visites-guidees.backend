@@ -59,7 +59,7 @@ async function main() {
     {
       key: 'campus-standard',
       title: { fr: 'Campus EPFL (Standard)', en: 'EPFL Campus (Standard)' },
-      picture: 'https://www.epfl.ch/campus/visitors/wp-content/uploads/2019/04/campus_rolex.jpg',
+      picture: 'https://www.epfl.ch/about/wp-content/uploads/2020/01/EPFL-vue-aerienne-1536x864.jpg',
       description: { fr: 'Visite guidée générale du campus', en: 'General guided tour of the campus' },
       capacity: 20,
       price: 150,
@@ -69,7 +69,7 @@ async function main() {
     {
       key: 'architecture-tour',
       title: { fr: 'Visite Architecture', en: 'Architecture Tour' },
-      picture: 'https://www.epfl.ch/campus/visitors/wp-content/uploads/2019/04/artlab.jpg',
+      picture: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRbhiW4RZMfDQrIRYiaUWf-qXsgICEDJgOaRMiVWWRYI8Nl-sS2mJe47EoK&s=10',
       description: { fr: 'Découverte des bâtiments emblématiques', en: 'Discovery of iconic buildings' },
       capacity: 15,
       price: 200,
@@ -79,7 +79,7 @@ async function main() {
     {
       key: 'rolex-learning-center',
       title: { fr: 'Rolex Learning Center', en: 'Rolex Learning Center' },
-      picture: 'https://www.epfl.ch/campus/visitors/wp-content/uploads/2019/04/rolex-learning-center.jpg',
+      picture: 'https://upload.wikimedia.org/wikipedia/commons/b/b8/Rolex_Learning_center.jpg?utm_source=en.wikipedia.org&utm_campaign=index&utm_content=original',
       description: { fr: 'Visite du bâtiment emblématique et de sa bibliothèque', en: 'Tour of the iconic building and its library' },
       capacity: 25,
       price: 100,
@@ -89,7 +89,7 @@ async function main() {
     {
       key: 'research-labs',
       title: { fr: 'Laboratoires de recherche', en: 'Research Labs' },
-      picture: 'https://www.epfl.ch/campus/visitors/wp-content/uploads/2019/04/labs.jpg',
+      picture: 'https://sti.epfl.ch/wp-content/uploads/2023/01/FLEXLAB.jpg',
       description: { fr: 'Découverte des laboratoires de pointe', en: 'Discovery of cutting-edge research labs' },
       capacity: 12,
       price: 250,
@@ -99,7 +99,7 @@ async function main() {
     {
       key: 'artlab',
       title: { fr: 'ArtLab', en: 'ArtLab' },
-      picture: 'https://www.epfl.ch/campus/visitors/wp-content/uploads/2019/04/artlab2.jpg',
+      picture: 'https://www.epfl.ch/about/philanthropy/wp-content/uploads/2019/01/ArtLab_5_alain_herzog-1536x864.jpg',
       description: { fr: 'Visite du centre culturel et artistique', en: 'Tour of the cultural and art center' },
       capacity: 30,
       price: 120,
@@ -109,7 +109,7 @@ async function main() {
     {
       key: 'night-tour',
       title: { fr: 'Visite nocturne du campus', en: 'Night Campus Tour' },
-      picture: 'https://www.epfl.ch/campus/visitors/wp-content/uploads/2019/04/campus-night.jpg',
+      picture: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTNWogpz9oDzkA8YrqFVJUrvY9FuC8x2-gh9FALxL3ADw&s=10',
       description: { fr: 'Découverte du campus illuminé en soirée', en: 'Discovery of the illuminated campus at night' },
       capacity: 18,
       price: 180,
