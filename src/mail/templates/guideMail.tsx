@@ -28,12 +28,6 @@ const colors = {
   white: '#FFFFFF',
 };
 
-const textStyle = {
-  fontFamily: 'Arial, sans-serif',
-  fontSize: '14px',
-  color: '#333333',
-};
-
 export function VisitGuideEmail({ data }: { data: guideNotification }) {
   const details = [
     { label: 'La langue souhaitée : ', content: data.language },
@@ -163,21 +157,6 @@ const paragraph = {
   lineHeight: '22px',
   color: colors.text,
   margin: '0 0 16px 0',
-};
-
-const detailLabel = {
-  width: '150px',
-  padding: '10px 0',
-  fontSize: '14px',
-  color: colors.muted,
-  verticalAlign: 'top',
-};
-
-const detailValue = {
-  padding: '10px 0',
-  fontSize: '14px',
-  color: colors.black,
-  verticalAlign: 'top',
 };
 
 const buttonBase = {
