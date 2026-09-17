@@ -31,5 +31,5 @@ export interface UserInfo {
   firstName: string;
   lastName: string;
   mail: string;
-  roles: string[]
+  roles: string[];
 }

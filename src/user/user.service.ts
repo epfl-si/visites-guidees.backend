@@ -10,7 +10,7 @@ export class UserService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly apiService: ApiService,
-  ) { }
+  ) {}
 
   async FormatUserInfo(Req: ReqEntraOauthUser): Promise<UserInfo> {
     const guide = await this.prisma.guide.findUnique({
@@ -22,8 +22,8 @@ export class UserService {
     const ADMIN_GROUP = 'visites-guidees-admins_AppGrpU';
 
     const roles = [
-      Req.groups.includes(ADMIN_GROUP) && "admin",
-      guide && "guide"
+      Req.groups.includes(ADMIN_GROUP) && 'admin',
+      guide && 'guide',
     ].filter((role): role is string => Boolean(role));
 
     const data: UserInfo = {

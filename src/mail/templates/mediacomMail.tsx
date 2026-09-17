@@ -8,7 +8,6 @@ import {
   Heading,
   Hr,
   Html,
-  Link,
   Preview,
   Row,
   Section,
@@ -160,14 +159,6 @@ const container = {
   padding: '0 32px',
 };
 
-const wordmark = {
-  fontSize: '32px',
-  fontWeight: 700,
-  color: colors.black,
-  letterSpacing: '0.5px',
-  margin: 0,
-};
-
 const title = {
   fontSize: '19px',
   fontWeight: 700,
@@ -182,21 +173,6 @@ const paragraph = {
   margin: '0 0 16px 0',
 };
 
-const detailLabel = {
-  width: '150px',
-  padding: '10px 0',
-  fontSize: '14px',
-  color: colors.muted,
-  verticalAlign: 'top',
-};
-
-const detailValue = {
-  padding: '10px 0',
-  fontSize: '14px',
-  color: colors.black,
-  verticalAlign: 'top',
-};
-
 const buttonBase = {
   display: 'inline-block',
   padding: '11px 26px',
@@ -206,13 +182,6 @@ const buttonBase = {
   textAlign: 'center' as const,
   backgroundColor: colors.red,
   color: colors.white,
-};
-
-const note = {
-  fontSize: '13px',
-  lineHeight: '20px',
-  color: colors.muted,
-  marginTop: '16px',
 };
 
 const footer = {

@@ -10,7 +10,7 @@ import { adminGroup } from '@/constant/auth';
 
 @Controller({ path: 'users', version: '1' })
 export class UserController {
-  constructor(private readonly userService: UserService) { }
+  constructor(private readonly userService: UserService) {}
 
   @UseGuards(AzureAdGuard)
   @Get('me')
