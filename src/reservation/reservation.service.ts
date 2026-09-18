@@ -28,7 +28,7 @@ export class ReservationService {
     private prisma: PrismaService,
     private guide: GuideService,
     private mail: MailService,
-  ) { }
+  ) {}
 
   private isAtLeast7BusinessDaysBefore(visitDate: Date | string): boolean {
     const today = new Date();
@@ -106,13 +106,26 @@ export class ReservationService {
       where: isAdmin
         ? { id }
         : {
-          id, reservationGuides: {
-            some: {
-              guideId: Number(user.uniqueid)
-            }
-          }
+            id,
+            reservationGuides: {
+              some: {
+                guideId: Number(user.uniqueid),
+              },
+            },
+          },
+      include: {
+        language: true,
+        place: true,
+        reservationGuides: {
+          select: {
+            guide: {
+              include: {
+                user: true,
+              },
+            },
+          },
         },
-      include: { reservationGuides: true },
+      },
     });
 
     if (!reservation) {
@@ -235,7 +248,9 @@ export class ReservationService {
       select: ReservationService.invitationSelect,
     });
     if (!invitation) {
-      this.logger.warn(`No invitation for guide ${sciper} on reservation ${id}`);
+      this.logger.warn(
+        `No invitation for guide ${sciper} on reservation ${id}`,
+      );
       throw new NotFoundException(
         `No invitation found for guide ${sciper} on reservation ${id}`,
       );
@@ -249,12 +264,14 @@ export class ReservationService {
     action: ReservationGuideAction,
     sciper: number,
   ) {
-    const status = action === ReservationGuideAction.ACCEPT ? 'ACCEPTED' : 'DECLINED';
+    const status =
+      action === ReservationGuideAction.ACCEPT ? 'ACCEPTED' : 'DECLINED';
 
     try {
       await this.prisma.reservationGuide.update({
         where: {
-          reservationId_guideId: { reservationId: id, guideId: sciper }, status: { not: 'CHOSEN' }
+          reservationId_guideId: { reservationId: id, guideId: sciper },
+          status: { not: 'CHOSEN' },
         },
         data: { status, updatedAt: new Date() },
       });
@@ -270,9 +287,11 @@ export class ReservationService {
       throw error;
     }
 
-    this.logger.log(`Reservation ${id} ${status.toLowerCase()} by guide ${sciper}`);
+    this.logger.log(
+      `Reservation ${id} ${status.toLowerCase()} by guide ${sciper}`,
+    );
 
-    return
+    return;
   }
 
   async remove(id: number): Promise<void> {

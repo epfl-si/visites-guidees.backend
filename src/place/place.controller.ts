@@ -23,7 +23,7 @@ import { adminGroup } from '@/constant/auth';
 
 @Controller({ path: 'places', version: '1' })
 export class PlaceController {
-  constructor(private readonly placeService: PlaceService) { }
+  constructor(private readonly placeService: PlaceService) {}
 
   @Get()
   @ApiResponse({ type: [ResponsePlaceListDto] })

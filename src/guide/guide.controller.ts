@@ -22,7 +22,7 @@ import { adminGroup } from '@/constant/auth';
 
 @Controller({ path: 'guides', version: '1' })
 export class GuideController {
-  constructor(private readonly guideService: GuideService) { }
+  constructor(private readonly guideService: GuideService) {}
 
   @Get()
   @ApiResponse({ type: [ListGuideDto] })
