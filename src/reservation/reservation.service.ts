@@ -112,7 +112,18 @@ export class ReservationService {
             }
           }
         },
-      include: { reservationGuides: true },
+      include: { reservationGuides: {
+        include: {
+          guide: {
+            include: {
+              user: { select: { firstName: true, lastName: true } }
+            }
+          }
+        }
+      },
+      language: true,
+      place: true
+     },
     });
 
     if (!reservation) {
