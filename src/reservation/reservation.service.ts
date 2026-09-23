@@ -106,13 +106,13 @@ export class ReservationService {
       where: isAdmin
         ? { id }
         : {
-            id,
-            reservationGuides: {
-              some: {
-                guideId: Number(user.uniqueid),
-              },
+          id,
+          reservationGuides: {
+            some: {
+              guideId: Number(user.uniqueid),
             },
           },
+        },
       include: {
         language: true,
         place: true,
@@ -190,7 +190,7 @@ export class ReservationService {
     await this.createGuideToReservation(reservation.id, compatibleGuidesIds);
 
     await this.mail.notifyGuide(compatibleGuidesIds, {
-      url: process.env.FRONTEND_URL + `/reservations/${reservation.id}`,
+      url: process.env.FRONTEND_URL + `/guide/reservations/${reservation.id}`,
       date: reservation.date,
       language: language.name,
       place: (place.title as { fr: string }).fr,
