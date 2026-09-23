@@ -21,7 +21,7 @@ export class GuideGuard implements CanActivate {
       select: { status: true },
     });
 
-    if (!guide || guide.status !== "ACTIVE") {
+    if (!guide || guide.status !== 'ACTIVE') {
       throw new ForbiddenException('Your are not an active guide');
     }
 

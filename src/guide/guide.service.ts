@@ -20,7 +20,7 @@ export class GuideService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly apiService: ApiService,
-  ) { }
+  ) {}
 
   async list(): Promise<ListGuideDto[]> {
     const guides = await this.prisma.guide.findMany({

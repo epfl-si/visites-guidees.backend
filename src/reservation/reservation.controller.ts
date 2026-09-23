@@ -32,7 +32,7 @@ import { adminGroup } from '@/constant/auth';
 
 @Controller({ path: 'reservations', version: '1' })
 export class ReservationController {
-  constructor(private readonly reservationService: ReservationService) { }
+  constructor(private readonly reservationService: ReservationService) {}
 
   @Get()
   @ApiResponse({ type: [ListReservationDto] })
@@ -51,7 +51,8 @@ export class ReservationController {
   @ApiResponse({ type: ReadReservationDto })
   @UseGuards(AzureAdGuard, GroupsGuard)
   @ApiBearerAuth('access-token')
-  read(@Param('id', ParseIntPipe) id: number,
+  read(
+    @Param('id', ParseIntPipe) id: number,
     @CurrentUser() user: ReqEntraOauthUser,
   ): Promise<ReadReservationDto> {
     return this.reservationService.read(id, user);

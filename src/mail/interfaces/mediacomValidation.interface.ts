@@ -1,13 +1,13 @@
 export interface mediacomValidation {
   guide: {
-    name: string,
-    lastName: string,
-    sciper: string,
+    name: string;
+    lastName: string;
+    sciper: string;
   }[];
   place: string;
   date: Date;
-  numberOfGuide: number,
-  language: string,
-  participantsNumber: number,
-  url: string
+  numberOfGuide: number;
+  language: string;
+  participantsNumber: number;
+  url: string;
 }

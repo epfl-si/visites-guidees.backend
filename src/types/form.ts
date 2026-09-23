@@ -11,7 +11,7 @@ export interface form {
   region: string;
   zip: number;
   country: string;
-  visitDate: number | Date; // reste tel quel : c'est ce que le front envoie
+  visitDate: number | Date;
   numberOfParticipant: number;
   languageId: number;
   comments?: string;
