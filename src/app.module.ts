@@ -6,6 +6,7 @@ import { UserModule } from './user/user.module';
 import { PlaceModule } from './place/place.module';
 import { RequestIdMiddleware } from './common/middleware/request-id.middleware';
 import { GuideModule } from './guide/guide.module';
+import { LanguageModule } from './language/language.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { GuideModule } from './guide/guide.module';
     UserModule,
     PlaceModule,
     GuideModule,
+    LanguageModule,
   ],
   controllers: [],
   providers: [],
