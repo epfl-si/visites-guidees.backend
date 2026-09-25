@@ -52,8 +52,12 @@ export class GuideService {
   }
 
   async create(createGuideDto: CreateGuideDto): Promise<ReadGuideDto> {
+    const { sciper, startDate, languageIds, placeIds } = createGuideDto;
+
+    await this.assertLanguagesExist(languageIds);
+
     const person = await this.apiService.callEPFLApi<Person>(
-      `v1/persons/${createGuideDto.sciper}`,
+      `v1/persons/${sciper}`,
     );
 
     if (person == null || !person.isaccredited) {
@@ -81,10 +85,42 @@ export class GuideService {
       },
     });
 
+    const languages = languageIds.map((languageId) => ({ id: languageId }));
+
+    const places = placeIds.map((placeId) => ({ id: placeId }));
+
+    const now = new Date();
+    const start = new Date(startDate);
+    const blockedPeriods =
+      start > now
+        ? {
+            create: {
+              label: {
+                fr: 'Avant la prise de fonction',
+                en: 'Before start date',
+              },
+              start: now,
+              end: start,
+            },
+          }
+        : undefined;
+
     const guide = await this.prisma.guide.upsert({
       where: { id },
-      update: { status: 'ACTIVE', phone },
-      create: { id, phone },
+      update: {
+        status: 'ACTIVE',
+        phone,
+        languages: { set: languages },
+        blockedPeriods,
+        places: { set: places },
+      },
+      create: {
+        id,
+        phone,
+        languages: { connect: languages },
+        blockedPeriods,
+        places: { connect: places },
+      },
       include: { user: true, languages: true, blockedPeriods: true },
     });
 
@@ -99,19 +135,7 @@ export class GuideService {
     const { languageIds, ...rest } = updateGuideDto;
 
     if (languageIds) {
-      const languages = await this.prisma.language.findMany({
-        where: { id: { in: languageIds } },
-      });
-
-      const missingIds = languageIds.filter(
-        (languageId) => !languages.some(({ id }) => id === languageId),
-      );
-
-      if (missingIds.length > 0) {
-        const message = `No language found with id${missingIds.length === 1 ? '' : 's'} ${missingIds.join(', ')}`;
-        this.logger.warn(message);
-        throw new NotFoundException(message);
-      }
+      await this.assertLanguagesExist(languageIds);
     }
 
     try {
@@ -158,6 +182,22 @@ export class GuideService {
         throw new NotFoundException(`No guide found with id ${id}`);
       }
       throw error;
+    }
+  }
+
+  private async assertLanguagesExist(languageIds: number[]): Promise<void> {
+    const languages = await this.prisma.language.findMany({
+      where: { id: { in: languageIds } },
+    });
+
+    const missingIds = languageIds.filter(
+      (languageId) => !languages.some(({ id }) => id === languageId),
+    );
+
+    if (missingIds.length > 0) {
+      const message = `No language found with id${missingIds.length === 1 ? '' : 's'} ${missingIds.join(', ')}`;
+      this.logger.warn(message);
+      throw new NotFoundException(message);
     }
   }
 
