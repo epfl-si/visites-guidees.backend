@@ -17,6 +17,7 @@ import {
 import { ApiBearerAuth, ApiParam, ApiResponse } from '@nestjs/swagger';
 import { CreateReservationDto } from './dto/create.dto';
 import { UpdateReservationDto } from './dto/update.dto';
+import { ValidateReservationDto } from './dto/validate.dto';
 import { ListReservationDto } from './dto/list.dto';
 import { ReadReservationDto } from './dto/read.dto';
 import { Prisma } from '../../generated/prisma/client';
@@ -89,6 +90,21 @@ export class ReservationController {
     return this.reservationService.getGuideInvitation(
       id,
       Number(user.uniqueid),
+    );
+  }
+
+  @Post(':id/validate')
+  @ApiResponse({ type: ReadReservationDto })
+  @UseGuards(AzureAdGuard, GroupsGuard)
+  @RequireGroups(adminGroup)
+  @ApiBearerAuth('access-token')
+  validate(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() validateReservationDto: ValidateReservationDto,
+  ): Promise<ReadReservationDto> {
+    return this.reservationService.validate(
+      id,
+      validateReservationDto.guideIds,
     );
   }
 
