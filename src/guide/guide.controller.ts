@@ -19,6 +19,8 @@ import { AzureAdGuard } from '../auth/azure-ad-auth.guard';
 import { GroupsGuard } from '../guards/groups.guard';
 import { RequireGroups } from '../decorators/require-groups.decorator';
 import { adminGroup } from '@/constant/auth';
+import { GuideGuard } from '@/guards/guide.guard';
+import { ListReservationDto } from '@/reservation/dto/list.dto';
 
 @Controller({ path: 'guides', version: '1' })
 export class GuideController {
@@ -40,6 +42,26 @@ export class GuideController {
   @ApiBearerAuth('access-token')
   read(@Param('id', ParseIntPipe) id: number): Promise<ReadGuideDto> {
     return this.guideService.read(id);
+  }
+
+  @Get('user/:sciper')
+  @ApiResponse({ type: ReadGuideDto })
+  @UseGuards(AzureAdGuard, GuideGuard)
+  @ApiBearerAuth('access-token')
+  readbyUser(
+    @Param('sciper', ParseIntPipe) sciper: number,
+  ): Promise<ReadGuideDto> {
+    return this.guideService.readbyUser(sciper);
+  }
+
+  @Get(':id/visits')
+  @ApiResponse({ type: ListReservationDto })
+  @UseGuards(AzureAdGuard, GuideGuard)
+  @ApiBearerAuth('access-token')
+  readReservationsByGuide(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<ListReservationDto[]> {
+    return this.guideService.readReservationsByGuide(id);
   }
 
   @Post()
