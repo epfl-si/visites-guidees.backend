@@ -12,6 +12,7 @@ import { UpdateGuideDto } from './dto/update.dto';
 import { ApiService } from '../services/api/api.service';
 import { Person } from '../services/api/interfaces/person.interface';
 import { AppLogger as Logger } from '@/logger.service';
+import { ListReservationDto } from '@/reservation/dto/list.dto';
 
 @Injectable()
 export class GuideService {
@@ -49,6 +50,59 @@ export class GuideService {
 
     this.logger.log(`Read guide ${id}`);
     return guide as ReadGuideDto;
+  }
+
+  async readbyUser(sciper: number): Promise<ReadGuideDto> {
+    const guide = await this.prisma.guide.findFirst({
+      where: {
+        user: {
+          id: sciper,
+        },
+      },
+      include: { user: true, languages: true, blockedPeriods: true },
+    });
+
+    if (!guide) {
+      this.logger.warn(`No guide found with user sciper ${sciper}`);
+      throw new NotFoundException(`No guide found with user sciper ${sciper}`);
+    }
+
+    this.logger.log(`Read guide ${sciper}`);
+    return guide as ReadGuideDto;
+  }
+
+  async readReservationsByGuide(id: number): Promise<ListReservationDto[]> {
+    const reservations = await this.prisma.reservation.findMany({
+      where: {
+        status: 'READY',
+        reservationGuides: {
+          some: {
+            guideId: id,
+            status: 'ACCEPTED',
+          },
+        },
+      },
+      include: {
+        place: true,
+        language: true,
+        reservationGuides: {
+          where: { guideId: id },
+        },
+      },
+      orderBy: {
+        date: 'asc',
+      },
+    });
+
+    if (!reservations) {
+      this.logger.warn(`No reservation found with this guide id ${id}`);
+      throw new NotFoundException(
+        `No reservation found with this guide id ${id}`,
+      );
+    }
+
+    this.logger.log(`Read reservations of guide ${id}`);
+    return reservations;
   }
 
   async create(createGuideDto: CreateGuideDto): Promise<ReadGuideDto> {
