@@ -44,16 +44,6 @@ export class GuideController {
     return this.guideService.read(id);
   }
 
-  @Get('user/:sciper')
-  @ApiResponse({ type: ReadGuideDto })
-  @UseGuards(AzureAdGuard, GuideGuard)
-  @ApiBearerAuth('access-token')
-  readbyUser(
-    @Param('sciper', ParseIntPipe) sciper: number,
-  ): Promise<ReadGuideDto> {
-    return this.guideService.readbyUser(sciper);
-  }
-
   @Get(':id/visits')
   @ApiResponse({ type: ListReservationDto })
   @UseGuards(AzureAdGuard, GuideGuard)

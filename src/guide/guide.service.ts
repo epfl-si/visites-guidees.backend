@@ -52,25 +52,6 @@ export class GuideService {
     return guide as ReadGuideDto;
   }
 
-  async readbyUser(sciper: number): Promise<ReadGuideDto> {
-    const guide = await this.prisma.guide.findFirst({
-      where: {
-        user: {
-          id: sciper,
-        },
-      },
-      include: { user: true, languages: true, blockedPeriods: true },
-    });
-
-    if (!guide) {
-      this.logger.warn(`No guide found with user sciper ${sciper}`);
-      throw new NotFoundException(`No guide found with user sciper ${sciper}`);
-    }
-
-    this.logger.log(`Read guide ${sciper}`);
-    return guide as ReadGuideDto;
-  }
-
   async readReservationsByGuide(id: number): Promise<ListReservationDto[]> {
     const reservations = await this.prisma.reservation.findMany({
       where: {
@@ -78,7 +59,7 @@ export class GuideService {
         reservationGuides: {
           some: {
             guideId: id,
-            status: 'ACCEPTED',
+            status: 'CHOSEN',
           },
         },
       },
