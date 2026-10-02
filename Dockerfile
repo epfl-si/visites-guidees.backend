@@ -34,8 +34,9 @@ ENV HOSTNAME="0.0.0.0"
 
 COPY --from=build --chown=nestjs:nodejs /app/dist ./dist
 COPY --from=build --chown=nestjs:nodejs /app/prisma ./prisma
+COPY --from=build --chown=nestjs:nodejs /app/prisma.config.ts ./prisma.config.ts
 
 USER nestjs
 EXPOSE 3000
 
-CMD ["sh", "-c", "bunx prisma migrate deploy && node dist/main.js"]
+CMD ["sh", "-c", "bunx prisma migrate deploy && node dist/src/main.js"]
