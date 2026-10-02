@@ -10,8 +10,16 @@ import {
   UseGuards,
   HttpCode,
   HttpStatus,
+  Query,
+  ParseBoolPipe,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiResponse } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiResponse,
+  ApiExtraModels,
+  ApiQuery,
+  getSchemaPath,
+} from '@nestjs/swagger';
 import { PlaceService } from './place.service';
 import { CreatePlaceDto } from './dto/create.dto';
 import { UpdatePlaceDto } from './dto/update.dto';
@@ -26,9 +34,24 @@ export class PlaceController {
   constructor(private readonly placeService: PlaceService) {}
 
   @Get()
-  @ApiResponse({ type: [ResponsePlaceListDto] })
-  list(): Promise<ResponsePlaceListDto[]> {
-    return this.placeService.list();
+  @ApiExtraModels(ResponsePlaceListDto, ResponsePlaceDto)
+  @ApiQuery({ name: 'includeLanguage', required: false, type: Boolean })
+  @ApiResponse({
+    schema: {
+      type: 'array',
+      items: {
+        oneOf: [
+          { $ref: getSchemaPath(ResponsePlaceListDto) },
+          { $ref: getSchemaPath(ResponsePlaceDto) },
+        ],
+      },
+    },
+  })
+  list(
+    @Query('includeLanguage', new ParseBoolPipe({ optional: true }))
+    includeLanguage?: boolean,
+  ): Promise<ResponsePlaceListDto[] | ResponsePlaceDto[]> {
+    return this.placeService.list(includeLanguage);
   }
 
   @Get(':id')

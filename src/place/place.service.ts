@@ -12,15 +12,22 @@ export class PlaceService {
 
   constructor(private readonly prisma: PrismaService) {}
 
-  async list(): Promise<ResponsePlaceListDto[]> {
-    const places = await this.prisma.place.findMany();
+  list(include: true): Promise<ResponsePlaceDto[]>;
+  list(include?: false): Promise<ResponsePlaceListDto[]>;
+  list(include?: boolean): Promise<ResponsePlaceListDto[]>;
+  async list(include = false): Promise<ResponsePlaceListDto[]> {
+    const places = await this.prisma.place.findMany({
+      include: include ? { languages: true } : undefined,
+    });
 
     if (places.length === 0) {
       this.logger.warn('No place found');
       throw new NotFoundException('No place found');
     }
 
-    this.logger.log(`Listed ${places.length} place(s)`);
+    this.logger.log(
+      `Listed ${places.length} place(s) ${include ? 'with their languages' : ''}`,
+    );
     return places as ResponsePlaceListDto[];
   }
 
