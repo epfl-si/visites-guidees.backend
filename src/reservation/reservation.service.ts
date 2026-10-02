@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   Injectable,
   NotFoundException,
   UnprocessableEntityException,
@@ -118,6 +119,7 @@ export class ReservationService {
         place: true,
         reservationGuides: {
           select: {
+            status: true,
             guide: {
               include: {
                 user: true,
@@ -292,6 +294,57 @@ export class ReservationService {
     );
 
     return;
+  }
+
+  async validate(id: number, guideIds: number[]): Promise<ReadReservationDto> {
+    const reservation = await this.prisma.reservation.findUnique({
+      where: { id },
+      select: {
+        status: true,
+        reservationGuides: { select: { guideId: true, status: true } },
+      },
+    });
+
+    if (!reservation) {
+      this.logger.warn(`No reservation found with id ${id}`);
+      throw new NotFoundException(`No reservation found with id ${id}`);
+    }
+
+    if (reservation.status !== 'WAITINGVALIDATION') {
+      const message = `Reservation ${id} is ${reservation.status}, not WAITINGVALIDATION`;
+      this.logger.warn(message);
+      throw new ConflictException(message);
+    }
+
+    const acceptedIds = new Set(
+      reservation.reservationGuides
+        .filter((assignment) => assignment.status === 'ACCEPTED')
+        .map((assignment) => assignment.guideId),
+    );
+    const notAccepted = guideIds.filter((guideId) => !acceptedIds.has(guideId));
+
+    if (notAccepted.length > 0) {
+      const message = `Guide${notAccepted.length === 1 ? '' : 's'} ${notAccepted.join(', ')} did not accept reservation ${id}`;
+      this.logger.warn(message);
+      throw new UnprocessableEntityException(message);
+    }
+
+    await this.prisma.$transaction([
+      this.prisma.reservationGuide.updateMany({
+        where: { reservationId: id, guideId: { in: guideIds } },
+        data: { status: 'CHOSEN', updatedAt: new Date() },
+      }),
+      this.prisma.reservation.update({
+        where: { id },
+        data: { status: 'WAITINGPAYMENT' },
+      }),
+    ]);
+
+    this.logger.log(
+      `Validated reservation ${id} with guide(s) ${guideIds.join(', ')}`,
+    );
+
+    return this.read(id, { groups: [adminGroup] } as ReqEntraOauthUser);
   }
 
   async remove(id: number): Promise<void> {
