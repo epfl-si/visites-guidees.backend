@@ -4,6 +4,7 @@ import { render } from '@react-email/components';
 import { VisitGuideEmail } from '@/mail/templates/guideMail';
 import { guideNotification } from '@/mail/interfaces/guideNotification.interface';
 import { PrismaService } from '@/prisma.service';
+import { FRENCHMAILSENDER } from '@/constant/mail';
 
 @Injectable()
 export class MailService {
@@ -14,7 +15,7 @@ export class MailService {
 
   async sendMail(destination: string, subject: string, message: string) {
     await this.mailService.sendMail({
-      from: 'visites-guidees@epfl.ch',
+      from: FRENCHMAILSENDER,
       to: destination,
       subject: subject,
       text: message,
@@ -42,7 +43,7 @@ export class MailService {
         );
 
         await this.mailService.sendMail({
-          from: 'visites-guidees@epfl.ch',
+          from: FRENCHMAILSENDER,
           to: guide.user.email,
           subject: 'Proposition de visite guidée',
           html,
