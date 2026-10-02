@@ -12,8 +12,8 @@ export class MailService {
     private readonly prisma: PrismaService,
   ) {}
 
-  sendMail(destination: string, subject: string, message: string) {
-    this.mailService.sendMail({
+  async sendMail(destination: string, subject: string, message: string) {
+    await this.mailService.sendMail({
       from: 'visites-guidees@epfl.ch',
       to: destination,
       subject: subject,
@@ -41,7 +41,7 @@ export class MailService {
           />,
         );
 
-        this.mailService.sendMail({
+        await this.mailService.sendMail({
           from: 'visites-guidees@epfl.ch',
           to: guide.user.email,
           subject: 'Proposition de visite guidée',
