@@ -109,6 +109,17 @@ export class ReservationController {
     );
   }
 
+  @Post(':id/confirm-payment')
+  @ApiResponse({ type: ReadReservationDto })
+  @UseGuards(AzureAdGuard, GroupsGuard)
+  @RequireGroups(adminGroup)
+  @ApiBearerAuth('access-token')
+  confirmPayment(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<ReadReservationDto> {
+    return this.reservationService.confirmPayment(id);
+  }
+
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   @UseGuards(AzureAdGuard, GroupsGuard)

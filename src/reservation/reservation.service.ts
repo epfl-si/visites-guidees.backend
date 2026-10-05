@@ -1,6 +1,8 @@
 import {
   BadRequestException,
+  ConflictException,
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
   UnprocessableEntityException,
 } from '@nestjs/common';
@@ -292,6 +294,43 @@ export class ReservationService {
     );
 
     return;
+  }
+
+  async confirmPayment(id: number): Promise<ReadReservationDto> {
+    const reservation = await this.prisma.reservation.findUnique({
+      where: { id },
+    });
+
+    if (!reservation) {
+      this.logger.warn(`No reservation found with id ${id}`);
+      throw new NotFoundException(`No reservation found with id ${id}`);
+    }
+
+    if (reservation.status !== 'WAITINGPAYMENT') {
+      this.logger.warn(
+        `The status of reservation #${id} is ${reservation.status}, not WAITINGPAYMENT`,
+      );
+      throw new ConflictException(
+        `The status of reservation #${id} is ${reservation.status}, not WAITINGPAYMENT`,
+      );
+    }
+
+    const result = await this.prisma.reservation.update({
+      where: { id },
+      data: {
+        status: 'READY',
+      },
+    });
+
+    if (!result) {
+      this.logger.error(`Failed to validate payment of reservation #${id}`);
+      throw new InternalServerErrorException(
+        `Failed to validate payment of reservation #${id}`,
+      );
+    }
+    this.logger.log(`Payment of the reservation #${id} has been validate.`);
+
+    return result;
   }
 
   async remove(id: number): Promise<void> {
