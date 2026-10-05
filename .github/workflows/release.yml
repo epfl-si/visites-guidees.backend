@@ -39,6 +39,7 @@ jobs:
     uses: ./.github/workflows/build.yml
     with:
       tag: ${{ needs.detect-version.outputs.version }}
+    secrets: inherit
 
   create-release:
     needs: [detect-version, build]

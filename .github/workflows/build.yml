@@ -47,13 +47,13 @@ jobs:
       - name: Login to the Container registry
         uses: docker/login-action@v4
         with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          registry: quay-its.epfl.ch
+          username: ${{ secrets.QUAY_PUSHER }}
+          password: ${{ secrets.QUAY_PUSHER_TOKEN }}
 
       - name: Push image
         run: |
-          IMAGE_ID=$(echo "ghcr.io/${{ github.repository }}" | tr '[A-Z]' '[a-z]')
+          IMAGE_ID="quay-its.epfl.ch/svc0176/visites-guidees-backend"
           TAG=${{ inputs.tag }}
           echo "Push image $IMAGE_ID:$TAG"
 
