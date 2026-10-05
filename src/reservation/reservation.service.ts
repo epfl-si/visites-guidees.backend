@@ -108,13 +108,13 @@ export class ReservationService {
       where: isAdmin
         ? { id }
         : {
-          id,
-          reservationGuides: {
-            some: {
-              guideId: Number(user.uniqueid),
+            id,
+            reservationGuides: {
+              some: {
+                guideId: Number(user.uniqueid),
+              },
             },
           },
-        },
       include: {
         language: true,
         place: true,
