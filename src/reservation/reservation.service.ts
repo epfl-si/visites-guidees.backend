@@ -19,6 +19,7 @@ import { GuideService } from '@/guide/guide.service';
 import { MailService } from '@/mail/mail.service';
 import { ReservationGuideAction } from './reservation-guide-action.enum';
 import { ReqEntraOauthUser } from '@/types/auth';
+import { mediacomValidation } from '@/mail/interfaces/mediacomValidation.interface';
 import { adminGroup } from '@/constant/auth';
 
 @Injectable()
@@ -270,13 +271,20 @@ export class ReservationService {
     const status =
       action === ReservationGuideAction.ACCEPT ? 'ACCEPTED' : 'DECLINED';
 
+    let crewComplete: mediacomValidation | null = null;
+
     try {
-      await this.prisma.reservationGuide.update({
-        where: {
-          reservationId_guideId: { reservationId: id, guideId: sciper },
-          status: { not: 'CHOSEN' },
-        },
-        data: { status, updatedAt: new Date() },
+      crewComplete = await this.prisma.$transaction(async (tx) => {
+        await tx.reservationGuide.update({
+          where: {
+            reservationId_guideId: { reservationId: id, guideId: sciper },
+            status: { not: 'CHOSEN' },
+          },
+          data: { status, updatedAt: new Date() },
+        });
+
+        if (status !== 'ACCEPTED') return null;
+        return this.requestValidationIfCrewComplete(tx, id);
       });
     } catch (error) {
       if (
@@ -294,7 +302,73 @@ export class ReservationService {
       `Reservation ${id} ${status.toLowerCase()} by guide ${sciper}`,
     );
 
+    if (crewComplete) {
+      try {
+        await this.mail.notifyMediacom(crewComplete);
+        this.logger.log(`Asked Mediacom to validate reservation ${id}`);
+      } catch (error) {
+        this.logger.error(
+          `Reservation ${id} is ready for validation but Mediacom could not be notified`,
+          error instanceof Error ? error.stack : JSON.stringify(error),
+        );
+      }
+    }
+
     return;
+  }
+
+  private async requestValidationIfCrewComplete(
+    tx: Prisma.TransactionClient,
+    id: number,
+  ): Promise<mediacomValidation | null> {
+    const reservation = await tx.reservation.findUnique({
+      where: { id },
+      select: {
+        status: true,
+        date: true,
+        participantNumber: true,
+        language: { select: { name: true } },
+        place: { select: { title: true, capacity: true } },
+        reservationGuides: {
+          where: { status: 'ACCEPTED' },
+          select: {
+            guideId: true,
+            guide: {
+              select: { user: { select: { firstName: true, lastName: true } } },
+            },
+          },
+        },
+      },
+    });
+
+    if (!reservation) return null;
+
+    const requiredGuides = Math.max(
+      1,
+      Math.ceil(reservation.participantNumber / reservation.place.capacity),
+    );
+
+    if (reservation.reservationGuides.length < requiredGuides) return null;
+
+    const { count } = await tx.reservation.updateMany({
+      where: { id, status: 'WAITINGGUIDE' },
+      data: { status: 'WAITINGVALIDATION' },
+    });
+    if (count === 0) return null;
+
+    return {
+      guide: reservation.reservationGuides.map((assignment) => ({
+        name: assignment.guide.user.firstName,
+        lastName: assignment.guide.user.lastName,
+        sciper: String(assignment.guideId),
+      })),
+      date: reservation.date,
+      place: (reservation.place.title as { fr: string }).fr,
+      language: reservation.language.name,
+      numberOfGuide: requiredGuides,
+      participantsNumber: reservation.participantNumber,
+      url: process.env.FRONTEND_URL + `/admin/reservation/${id}`,
+    };
   }
 
   async validate(id: number, guideIds: number[]): Promise<ReadReservationDto> {
