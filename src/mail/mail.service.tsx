@@ -3,6 +3,8 @@ import { Injectable } from '@nestjs/common';
 import { render } from '@react-email/components';
 import { VisitGuideEmail } from '@/mail/templates/guideMail';
 import { guideNotification } from '@/mail/interfaces/guideNotification.interface';
+import MediacomValidationMail from '@/mail/templates/mediacomMail';
+import { mediacomValidation } from '@/mail/interfaces/mediacomValidation.interface';
 import { GuideChosenEmail } from '@/mail/templates/guideChosenMail';
 import { guideChosen } from '@/mail/interfaces/guideChosen.interface';
 import { PrismaService } from '@/prisma.service';
@@ -20,6 +22,17 @@ export class MailService {
       to: destination,
       subject: subject,
       text: message,
+    });
+  }
+
+  async notifyMediacom(data: mediacomValidation) {
+    const html = await render(<MediacomValidationMail data={data} />);
+
+    await this.mailService.sendMail({
+      from: 'visites-guidees@epfl.ch',
+      to: process.env.MEDIACOM_EMAIL ?? 'visites-guidees@epfl.ch',
+      subject: 'Demande de validation de visite guidée',
+      html,
     });
   }
 
