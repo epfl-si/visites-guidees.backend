@@ -324,7 +324,11 @@ export class ReservationService {
         include: {
           reservationGuides: {
             include: {
-              guide: true,
+              guide: {
+                include: {
+                  user: true,
+                },
+              },
             },
           },
           language: true,
