@@ -315,22 +315,23 @@ export class ReservationService {
       );
     }
 
-    const result = await this.prisma.reservation.update({
-      where: { id },
-      data: {
-        status: 'READY',
-      },
-    });
+    try {
+      const result = await this.prisma.reservation.update({
+        where: { id },
+        data: {
+          status: 'READY',
+        },
+      });
 
-    if (!result) {
+      this.logger.log(`Payment of the reservation #${id} has been validate.`);
+
+      return result;
+    } catch {
       this.logger.error(`Failed to validate payment of reservation #${id}`);
       throw new InternalServerErrorException(
         `Failed to validate payment of reservation #${id}`,
       );
     }
-    this.logger.log(`Payment of the reservation #${id} has been validate.`);
-
-    return result;
   }
 
   async remove(id: number): Promise<void> {
