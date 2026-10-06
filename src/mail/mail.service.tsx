@@ -3,6 +3,8 @@ import { Injectable } from '@nestjs/common';
 import { render } from '@react-email/components';
 import { VisitGuideEmail } from '@/mail/templates/guideMail';
 import { guideNotification } from '@/mail/interfaces/guideNotification.interface';
+import { GuideChosenEmail } from '@/mail/templates/guideChosenMail';
+import { guideChosen } from '@/mail/interfaces/guideChosen.interface';
 import { PrismaService } from '@/prisma.service';
 
 @Injectable()
@@ -19,6 +21,36 @@ export class MailService {
       subject: subject,
       text: message,
     });
+  }
+
+  async notifyChosenGuides(ids: number[], data: Omit<guideChosen, 'guide'>) {
+    const guides = await this.prisma.guide.findMany({
+      where: { id: { in: ids } },
+      include: { user: true },
+    });
+
+    await Promise.all(
+      guides.map(async (guide) => {
+        const html = await render(
+          <GuideChosenEmail
+            data={{
+              ...data,
+              guide: {
+                name: guide.user.firstName,
+                lastName: guide.user.lastName,
+              },
+            }}
+          />,
+        );
+
+        await this.mailService.sendMail({
+          from: 'visites-guidees@epfl.ch',
+          to: guide.user.email,
+          subject: 'Vous animerez une visite guidée',
+          html,
+        });
+      }),
+    );
   }
 
   async notifyGuide(ids: number[], data: Omit<guideNotification, 'guide'>) {
