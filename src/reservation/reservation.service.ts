@@ -321,6 +321,15 @@ export class ReservationService {
         data: {
           status: 'READY',
         },
+        include: {
+          reservationGuides: {
+            include: {
+              guide: true,
+            },
+          },
+          language: true,
+          place: true,
+        },
       });
 
       this.logger.log(`Payment of the reservation #${id} has been validate.`);
