@@ -303,6 +303,10 @@ export class ReservationService {
       select: {
         status: true,
         reservationGuides: { select: { guideId: true, status: true } },
+        date: true,
+        participantNumber: true,
+        language: { select: { name: true } },
+        place: { select: { title: true } },
       },
     });
 
@@ -344,6 +348,21 @@ export class ReservationService {
     this.logger.log(
       `Validated reservation ${id} with guide(s) ${guideIds.join(', ')}`,
     );
+
+    try {
+      await this.mail.notifyChosenGuides(guideIds, {
+        date: reservation.date,
+        place: (reservation.place.title as { fr: string }).fr,
+        language: reservation.language.name,
+        participantsNumber: reservation.participantNumber,
+        numberOfGuide: guideIds.length,
+      });
+    } catch (error) {
+      this.logger.error(
+        `Couldn't notify the chosen guides for reservation ${id}`,
+        error instanceof Error ? error.stack : JSON.stringify(error),
+      );
+    }
 
     return this.read(id, { groups: [adminGroup] } as ReqEntraOauthUser);
   }
