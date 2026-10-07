@@ -6,12 +6,13 @@ COPY package.json bun.lock* ./
 RUN bun install --frozen-lockfile
 
 # build
-FROM oven/bun:1-alpine AS build
+# Real Node (not bun's node shim) so nest build rewrites the @/ path aliases
+FROM node:24-alpine AS build
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-RUN bunx prisma generate
-RUN bun run build
+RUN npx prisma generate
+RUN npm run build
 
 # runner
 FROM oven/bun:1-alpine AS runner
