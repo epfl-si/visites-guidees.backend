@@ -25,15 +25,13 @@ COPY package.json bun.lock* bun.lockb* ./
 RUN bun install --frozen-lockfile --production && \
     bun pm cache rm
 
-COPY --from=deps /app/node_modules/prisma ./node_modules/prisma
-COPY --from=deps /app/node_modules/.bin/prisma ./node_modules/.bin/prisma
-
 ENV NODE_ENV=production
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
 COPY --from=build --chown=nestjs:nodejs /app/dist ./dist
 COPY --from=build --chown=nestjs:nodejs /app/prisma ./prisma
+COPY --from=build --chown=nestjs:nodejs /app/prisma.config.ts ./prisma.config.ts
 
 USER nestjs
 EXPOSE 3000
