@@ -103,6 +103,17 @@ export class ReservationController {
     return this.reservationService.confirmPayment(id);
   }
 
+  @Post(':id/cancel')
+  @ApiResponse({ type: ReadReservationDto })
+  @UseGuards(AzureAdGuard, GroupsGuard)
+  @RequireGroups(adminGroup)
+  @ApiBearerAuth('access-token')
+  cancelReservation(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<ReadReservationDto> {
+    return this.reservationService.cancelReservation(id);
+  }
+
   @Post(':id/:action')
   @ApiParam({ name: 'action', enum: ReservationGuideAction })
   @UseGuards(AzureAdGuard, GuideGuard)
