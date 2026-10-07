@@ -267,6 +267,15 @@ export class ReservationService {
     const status =
       action === ReservationGuideAction.ACCEPT ? 'ACCEPTED' : 'DECLINED';
 
+    const reservation = await this.prisma.reservation.findUnique({
+      where: { id },
+    });
+    if (!reservation) {
+      throw new NotFoundException(
+        `No invitation found for guide ${sciper} on reservation ${id}`,
+      );
+    }
+
     try {
       await this.prisma.reservationGuide.update({
         where: {
@@ -291,7 +300,11 @@ export class ReservationService {
       `Reservation ${id} ${status.toLowerCase()} by guide ${sciper}`,
     );
 
-    return;
+    const numberOfPositiveAnswers = await this.prisma.reservationGuide.count({
+      where: { reservationId: id },
+    });
+    if (Math.ceil(reservation.participantNumber) == numberOfPositiveAnswers) {
+    }
   }
 
   async remove(id: number): Promise<void> {

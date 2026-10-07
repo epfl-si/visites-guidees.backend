@@ -5,6 +5,8 @@ import { VisitGuideEmail } from '@/mail/templates/guideMail';
 import { guideNotification } from '@/mail/interfaces/guideNotification.interface';
 import { PrismaService } from '@/prisma.service';
 import { FRENCHMAILSENDER } from '@/constant/mail';
+import { mediacomValidation } from './interfaces/mediacomValidation.interface';
+import MediacomValidationMail from '@/mail/templates/mediacomMail';
 
 @Injectable()
 export class MailService {
@@ -50,5 +52,13 @@ export class MailService {
         });
       }),
     );
+  }
+
+  async notifyMediacom(data: mediacomValidation) {
+    const htlm = await render(<MediacomValidationMail data={data} />);
+    await this.mailService.sendMail({
+      from: FRENCHMAILSENDER,
+      to: 
+    });
   }
 }

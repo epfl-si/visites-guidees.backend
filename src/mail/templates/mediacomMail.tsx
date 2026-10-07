@@ -27,7 +27,7 @@ const colors = {
   white: '#FFFFFF',
 };
 
-export default function mediacomValidationMail({
+export default function MediacomValidationMail({
   data,
 }: {
   data: mediacomValidation;
