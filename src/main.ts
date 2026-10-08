@@ -19,6 +19,7 @@ async function bootstrap() {
   app.useGlobalInterceptors(new TransformInterceptor());
 
   const config = new DocumentBuilder()
+    .addServer(process.env.API_BASE_PATH ?? '/')
     .setTitle('Guided Tours API')
     .setDescription('API documentation for the Guided Tours application')
     .setVersion('1.0')
@@ -37,7 +38,7 @@ async function bootstrap() {
 
   const documentFactory = () => SwaggerModule.createDocument(app, config);
 
-  SwaggerModule.setup('api', app, documentFactory);
+  SwaggerModule.setup('docs', app, documentFactory);
 
   app.enableCors({
     origin: process.env.FRONTEND_URL,
