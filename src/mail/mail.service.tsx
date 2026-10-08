@@ -4,6 +4,7 @@ import { render } from '@react-email/components';
 import { VisitGuideEmail } from '@/mail/templates/guideMail';
 import { guideNotification } from '@/mail/interfaces/guideNotification.interface';
 import { PrismaService } from '@/prisma.service';
+import { Reservation } from '@/types/reservation';
 
 @Injectable()
 export class MailService {
@@ -49,5 +50,18 @@ export class MailService {
         });
       }),
     );
+  }
+
+  async sendConfirmationAfterForm(reservation: Reservation) {
+    const html = await render(
+      <
+    )
+
+    this.mailService.sendMail({
+      from: 'visites-guidees@epfl.ch',
+      to: reservation.email,
+      subject: 'Accusé de reception',
+      html,
+    });
   }
 }
