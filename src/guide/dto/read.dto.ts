@@ -7,6 +7,7 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { ListGuideDto } from './list.dto';
+import { ResponsePlaceListDto } from '@/place/dto/response.dto';
 
 export class BlockedPeriodDto {
   @ApiProperty()
@@ -43,4 +44,9 @@ export class ReadGuideDto extends ListGuideDto {
   @IsArray()
   @ValidateNested({ each: true })
   blockedPeriods!: BlockedPeriodDto[];
+
+  @ApiProperty({ type: [ResponsePlaceListDto] })
+  @IsArray()
+  @ValidateNested({ each: true })
+  places!: ResponsePlaceListDto[];
 }

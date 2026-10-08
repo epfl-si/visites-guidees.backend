@@ -39,7 +39,12 @@ export class GuideService {
   async read(id: number): Promise<ReadGuideDto> {
     const guide = await this.prisma.guide.findUnique({
       where: { id },
-      include: { user: true, languages: true, blockedPeriods: true },
+      include: {
+        user: true,
+        languages: true,
+        blockedPeriods: true,
+        places: true,
+      },
     });
 
     if (!guide) {
@@ -121,7 +126,12 @@ export class GuideService {
         blockedPeriods,
         places: { connect: places },
       },
-      include: { user: true, languages: true, blockedPeriods: true },
+      include: {
+        user: true,
+        languages: true,
+        blockedPeriods: true,
+        places: true,
+      },
     });
 
     this.logger.log(`Created guide ${id}`);
@@ -149,7 +159,12 @@ export class GuideService {
             },
           }),
         },
-        include: { user: true, languages: true, blockedPeriods: true },
+        include: {
+          user: true,
+          languages: true,
+          blockedPeriods: true,
+          places: true,
+        },
       });
 
       this.logger.log(`Updated guide ${id}`);
