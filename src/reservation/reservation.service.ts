@@ -201,6 +201,8 @@ export class ReservationService {
       participantsNumber: reservation.participantNumber,
     });
 
+    await this.mail.
+
     return reservation;
   }
 
