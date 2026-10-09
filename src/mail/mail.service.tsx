@@ -5,6 +5,8 @@ import { VisitGuideEmail } from '@/mail/templates/guideMail';
 import { guideNotification } from '@/mail/interfaces/guideNotification.interface';
 import { PrismaService } from '@/prisma.service';
 import { Reservation } from '@/types/reservation';
+import { ConfirmationAfterForm } from './templates/confirmationAfterForm';
+import { Place } from '@/types/place';
 
 @Injectable()
 export class MailService {
@@ -52,10 +54,10 @@ export class MailService {
     );
   }
 
-  async sendConfirmationAfterForm(reservation: Reservation) {
+  async sendConfirmationAfterForm(reservation: Reservation, place: Place) {
     const html = await render(
-      <
-    )
+      <ConfirmationAfterForm place={place} reservation={reservation} />,
+    );
 
     this.mailService.sendMail({
       from: 'visites-guidees@epfl.ch',

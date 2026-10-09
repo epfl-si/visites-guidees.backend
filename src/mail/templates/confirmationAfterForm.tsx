@@ -56,7 +56,7 @@ export function ConfirmationAfterForm({
             <Text>
               Bonjour {reservation.firstName} {reservation.lastName}, <br />
               Nous avons bien reçu votre demande de réservation pour{' '}
-              {place.title?.fr} <br />
+              {(place.title as { fr?: string } | null)?.fr} <br />
               nous traiterons votre demande dans les plus brefs délais.
             </Text>
             <Hr className="border-zinc-200 mt-10" />
