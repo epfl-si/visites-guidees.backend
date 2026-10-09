@@ -307,8 +307,9 @@ export class ReservationService {
     });
 
     if (!reservation) {
-      this.logger.warn(`No reservation found with id ${id}`);
-      throw new NotFoundException(`No reservation found with id ${id}`);
+      const message = `No reservation found with id ${id}`;
+      this.logger.warn(message);
+      throw new NotFoundException(message);
     }
 
     if (reservation.status !== 'WAITINGVALIDATION') {
