@@ -347,13 +347,28 @@ export class ReservationService {
     }
   }
 
-  async remove(id: number): Promise<void> {
+  async remove(id: number): Promise<ReadReservationDto> {
     try {
-      await this.prisma.reservation.update({
+      const reservation = await this.prisma.reservation.update({
         where: { id },
         data: { status: 'CANCELLED' },
+        include: {
+          reservationGuides: {
+            include: {
+              guide: {
+                include: {
+                  user: true,
+                },
+              },
+            },
+          },
+          language: true,
+          place: true,
+        },
       });
       this.logger.log(`Removed reservation ${id}`);
+
+      return reservation;
     } catch (error) {
       if (
         error instanceof Prisma.PrismaClientKnownRequestError &&
