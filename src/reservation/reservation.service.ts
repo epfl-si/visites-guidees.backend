@@ -261,48 +261,6 @@ export class ReservationService {
     return invitation as GuideInvitationDto;
   }
 
-  async cancelReservation(id: number): Promise<ReadReservationDto> {
-    const reservation = await this.prisma.reservation.findUnique({
-      where: { id },
-    });
-
-    if (!reservation) {
-      this.logger.warn(`No reservation found with id ${id}`);
-      throw new NotFoundException(`No reservation found with id ${id}`);
-    }
-
-    try {
-      const result = await this.prisma.reservation.update({
-        where: { id },
-        data: {
-          status: 'CANCELLED',
-        },
-        include: {
-          reservationGuides: {
-            include: {
-              guide: {
-                include: {
-                  user: true,
-                },
-              },
-            },
-          },
-          language: true,
-          place: true,
-        },
-      });
-
-      this.logger.log(`Payment of the reservation #${id} has been canceled.`);
-
-      return result;
-    } catch {
-      this.logger.error(`Failed to cancel reservation #${id}`);
-      throw new InternalServerErrorException(
-        `Failed to cancel reservation #${id}`,
-      );
-    }
-  }
-
   async respondToInvitation(
     id: number,
     action: ReservationGuideAction,
@@ -389,13 +347,28 @@ export class ReservationService {
     }
   }
 
-  async remove(id: number): Promise<void> {
+  async remove(id: number): Promise<ReadReservationDto> {
     try {
-      await this.prisma.reservation.update({
+      const reservation = await this.prisma.reservation.update({
         where: { id },
         data: { status: 'CANCELLED' },
+        include: {
+          reservationGuides: {
+            include: {
+              guide: {
+                include: {
+                  user: true,
+                },
+              },
+            },
+          },
+          language: true,
+          place: true,
+        },
       });
       this.logger.log(`Removed reservation ${id}`);
+
+      return reservation;
     } catch (error) {
       if (
         error instanceof Prisma.PrismaClientKnownRequestError &&
