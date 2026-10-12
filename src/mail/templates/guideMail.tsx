@@ -1,32 +1,13 @@
 import {
-  Body,
   Button,
-  Container,
   Column,
-  Font,
-  Head,
   Heading,
-  Hr,
-  Html,
-  Link,
-  Preview,
   Row,
   Section,
   Text,
-  Img,
-  Tailwind,
 } from '@react-email/components';
 import { guideNotification } from '../interfaces/guideNotification.interface';
-
-const colors = {
-  red: '#FF0000',
-  black: '#1A1A1A',
-  text: '#333333',
-  muted: '#767676',
-  border: '#E5E5E5',
-  borderStrong: '#CCCCCC',
-  white: '#FFFFFF',
-};
+import { MailTemplate } from './mail-template';
 
 export function VisitGuideEmail({ data }: { data: guideNotification }) {
   const details = [
@@ -43,144 +24,46 @@ export function VisitGuideEmail({ data }: { data: guideNotification }) {
       }),
     },
   ];
+  const preview =
+    'Proposition de visite guidée EPFL - merci de confirmer votre disponibilité.';
+
   return (
-    <Tailwind>
-      <Html lang="fr">
-        <Head>
-          <Font
-            fontFamily="Arial"
-            fallbackFontFamily="Helvetica"
-            fontWeight={400}
-            fontStyle="normal"
-          />
-        </Head>
-        <Preview>
-          Proposition de visite guidée EPFL - merci de confirmer votre
-          disponibilité.
-        </Preview>
-        <Body style={main}>
-          <Container style={container}>
-            {/* Wordmark */}
-            <Section>
-              <Img
-                alt="EPFL"
-                width={110}
-                height={32}
-                src="https://epfl-si.github.io/elements/svg/epfl-logo.svg"
-                style={{ display: 'inline-block' }}
-              />
-            </Section>
-
-            {/* Titre */}
-            <Heading style={title}>Proposition de visite guidée</Heading>
-
-            {/* Corps du message */}
-            <Text style={paragraph}>
-              Bonjour {data.guide.name} {data.guide.lastName},
-            </Text>
-            <Text style={paragraph}>
-              Nous avons reçu une demande de visite pour {data.place}
-            </Text>
-
-            {/* Détails */}
-            <Section>
-              {details.map((detail) => (
-                <Row>
-                  <Column width="8" valign="top" className="pr-[6px]">
-                    <Text className="m-0 text-black text-[14px] leading-[16px]">
-                      •
-                    </Text>
-                  </Column>
-                  <Column valign="top">
-                    <Text className="m-0 text-gray-500 text-[14px] leading-[16px]">
-                      {detail.label} <strong>{detail.content}</strong>
-                    </Text>
-                  </Column>
-                </Row>
-              ))}
-            </Section>
-
-            {/* Boutons Accepter / Refuser */}
-            <Section style={{ marginTop: '24px', marginBottom: '8px' }}>
-              <Row>
-                <Button style={buttonBase} href={data.url}>
-                  Accéder à la demande
-                </Button>
-              </Row>
-            </Section>
-
-            {/* Note complémentaire */}
-            <Hr style={{ borderColor: colors.border, marginTop: '20px' }} />
-            <Text style={note}>
-              Merci de répondre dès que possible. Pour toute question :{' '}
-              <Link style={{ color: colors.text }}>adresseMail à verifier</Link>{' '}
-              - MediacomTéléphone.
-            </Text>
-
-            {/* Pied de page */}
-            <Text style={footer}>
-              Mediacom - École polytechnique fédérale de Lausanne (EPFL)
-              <br />
-              EPFL P-MEDIACOM, CM 2 360 (Centre Midi), Station 10, CH-1015
-              Lausanne
-            </Text>
-          </Container>
-        </Body>
-      </Html>
-    </Tailwind>
+    <MailTemplate preview={preview}>
+      <Heading className="text-xl font-bold text-black mb-4 mt-4">
+        Proposition de visite guidée
+      </Heading>
+      <Text className="text-base/4 text-black mb-4">
+        Bonjour {data.guide.name} {data.guide.lastName},
+      </Text>
+      <Text className="text-base/4 text-black mb-4">
+        Nous avons reçu une demande de visite pour {data.place}
+      </Text>
+      <Section>
+        {details.map((detail) => (
+          <Row>
+            <Column width="8" valign="top" className="pr-[6px]">
+              <Text className="m-0 text-black text-[14px] leading-[16px]">
+                •
+              </Text>
+            </Column>
+            <Column className="align-top">
+              <Text className="m-0 text-gray-500 text-[14px] leading-[16px]">
+                {detail.label} <strong>{detail.content}</strong>
+              </Text>
+            </Column>
+          </Row>
+        ))}
+      </Section>
+      <Section className="mt-6 mb-2">
+        <Row>
+          <Button
+            href={data.url}
+            className="inline-block px-6 py-2 text-sm font-bold text-center bg-red-600 text-white"
+          >
+            Accéder à la demande
+          </Button>
+        </Row>
+      </Section>
+    </MailTemplate>
   );
 }
-
-// ---- Styles ----
-
-const main = {
-  backgroundColor: colors.white,
-  fontFamily: 'Arial, Helvetica, sans-serif',
-  boxSizing: 'border-box' as const,
-};
-
-const container = {
-  maxWidth: '680px',
-  margin: '0 auto',
-  padding: '0px',
-};
-
-const title = {
-  fontSize: '19px',
-  fontWeight: 700,
-  color: colors.black,
-  margin: '24px 0 4px 0',
-};
-
-const paragraph = {
-  fontSize: '15px',
-  lineHeight: '22px',
-  color: colors.text,
-  margin: '0 0 16px 0',
-};
-
-const buttonBase = {
-  display: 'inline-block',
-  padding: '11px 26px',
-  fontSize: '14px',
-  fontWeight: 700,
-  textDecoration: 'none',
-  textAlign: 'center' as const,
-  backgroundColor: colors.red,
-  color: colors.white,
-};
-
-const note = {
-  fontSize: '13px',
-  lineHeight: '20px',
-  color: colors.muted,
-  marginTop: '16px',
-};
-
-const footer = {
-  fontSize: '12px',
-  lineHeight: '18px',
-  color: '#999999',
-  marginTop: '8px',
-  marginBottom: '32px',
-};

@@ -45,7 +45,7 @@ export function MailTemplate({
             </Section>
             {children}
             <Hr className="border-zinc-200 mt-10" />
-            <Text className="text-xs/4 text-zinc-400">
+            <Text className="text-xs/4 text-zinc-400 -mt-0">
               Mediacom - École polytechnique fédérale de Lausanne (EPFL)
               <br />
               EPFL P-MEDIACOM, CM 2 360 (Centre Midi), Station 10, CH-1015
