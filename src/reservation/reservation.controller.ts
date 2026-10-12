@@ -11,8 +11,6 @@ import {
   ParseEnumPipe,
   Query,
   UseGuards,
-  HttpCode,
-  HttpStatus,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiParam, ApiResponse } from '@nestjs/swagger';
 import { CreateReservationDto } from './dto/create.dto';

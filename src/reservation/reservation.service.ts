@@ -20,6 +20,7 @@ import { MailService } from '@/mail/mail.service';
 import { ReservationGuideAction } from './reservation-guide-action.enum';
 import { ReqEntraOauthUser } from '@/types/auth';
 import { adminGroup } from '@/constant/auth';
+import { includeReservation } from '@/constant/include';
 
 @Injectable()
 export class ReservationService {
@@ -352,19 +353,7 @@ export class ReservationService {
       const reservation = await this.prisma.reservation.update({
         where: { id },
         data: { status: 'CANCELLED' },
-        include: {
-          reservationGuides: {
-            include: {
-              guide: {
-                include: {
-                  user: true,
-                },
-              },
-            },
-          },
-          language: true,
-          place: true,
-        },
+        include: includeReservation,
       });
       this.logger.log(`Removed reservation ${id}`);
 
