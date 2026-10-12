@@ -3,7 +3,6 @@ import {
   Container,
   Font,
   Head,
-  Hr,
   Html,
   Preview,
   Section,
@@ -32,25 +31,25 @@ export function MailTemplate({
           />
         </Head>
         <Preview>{preview}</Preview>
-        <Body className="bg-white font-sans box-border">
-          <Container className="max-w-170 m-auto">
-            <Section>
+        <Body className="bg-slate-100 font-sans">
+          <Container className="max-w-170 m-auto bg-white rounded-lg truncate shadow-[0_2px_8px_rgba(0,0,0,0.08)] ">
+            <Section className="bg-white pt-4 pb-6 px-8">
               <Img
                 alt="EPFL"
                 width={110}
                 height={32}
                 src="https://epfl-si.github.io/elements/svg/epfl-logo.svg"
-                className="inline-block"
+                className="inline-block ml-5"
               />
             </Section>
-            {children}
-            <Hr className="border-zinc-200 mt-10" />
-            <Text className="text-xs/4 text-zinc-400 -mt-0">
-              Mediacom - École polytechnique fédérale de Lausanne (EPFL)
-              <br />
-              EPFL P-MEDIACOM, CM 2 360 (Centre Midi), Station 10, CH-1015
-              Lausanne
-            </Text>
+            <Container className="px-3 mb-4">{children}</Container>
+            <Container className="bg-gray-50 pl-4">
+              <Text className="text-xs/4 text-zinc-400">
+                Mediacom - École polytechnique fédérale de Lausanne
+                <br />
+                EPFL P-MEDIACOM, CM 2 360, Station 10, CH-1015 Lausanne
+              </Text>
+            </Container>
           </Container>
         </Body>
       </Html>
