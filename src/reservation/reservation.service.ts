@@ -116,19 +116,7 @@ export class ReservationService {
               },
             },
           },
-      include: {
-        language: true,
-        place: true,
-        reservationGuides: {
-          select: {
-            guide: {
-              include: {
-                user: true,
-              },
-            },
-          },
-        },
-      },
+      include: includeReservation,
     });
 
     if (!reservation) {
