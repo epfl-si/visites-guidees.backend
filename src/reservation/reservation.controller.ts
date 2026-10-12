@@ -11,8 +11,6 @@ import {
   ParseEnumPipe,
   Query,
   UseGuards,
-  HttpCode,
-  HttpStatus,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiParam, ApiResponse } from '@nestjs/swagger';
 import { CreateReservationDto } from './dto/create.dto';
@@ -121,11 +119,10 @@ export class ReservationController {
   }
 
   @Delete(':id')
-  @HttpCode(HttpStatus.NO_CONTENT)
   @UseGuards(AzureAdGuard, GroupsGuard)
   @RequireGroups(adminGroup)
   @ApiBearerAuth('access-token')
-  remove(@Param('id', ParseIntPipe) id: number): Promise<void> {
+  remove(@Param('id', ParseIntPipe) id: number): Promise<ReadReservationDto> {
     return this.reservationService.remove(id);
   }
 }
