@@ -201,7 +201,7 @@ export class ReservationService {
       participantsNumber: reservation.participantNumber,
     });
 
-    await this.mail.
+    await this.mail.sendConfirmationAfterForm(reservation, place);
 
     return reservation;
   }
