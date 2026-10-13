@@ -200,8 +200,14 @@ export class ReservationService {
       participantsNumber: reservation.participantNumber,
     });
 
-    await this.mail.sendConfirmationAfterForm(reservation, place);
-
+    await this.mail
+      .sendConfirmationAfterForm(reservation, place)
+      .catch((e) =>
+        this.logger.error(
+          `Failed to send confirmation email after form submiting`,
+          e instanceof Error ? e.stack : JSON.stringify(e),
+        ),
+      );
     return reservation;
   }
 
