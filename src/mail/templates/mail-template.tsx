@@ -32,7 +32,7 @@ export function MailTemplate({
         </Head>
         <Preview>{preview}</Preview>
         <Body className="bg-slate-100 font-sans">
-          <Container className="max-w-170 m-auto bg-white rounded-lg truncate shadow-[0_2px_8px_rgba(0,0,0,0.08)] ">
+          <Container className="max-w-170 m-auto bg-white rounded-lg overflow-hidden shadow-[0_2px_8px_rgba(0,0,0,0.08)] ">
             <Section className="bg-white pt-4 pb-6 px-8">
               <Img
                 alt="EPFL"
