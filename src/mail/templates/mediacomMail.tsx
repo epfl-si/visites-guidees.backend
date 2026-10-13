@@ -1,31 +1,13 @@
 import {
-  Body,
   Button,
-  Container,
   Column,
-  Font,
-  Head,
   Heading,
-  Hr,
-  Html,
-  Preview,
   Row,
   Section,
   Text,
-  Img,
-  Tailwind,
 } from '@react-email/components';
 import { mediacomValidation } from '../interfaces/mediacomValidation.interface';
-
-const colors = {
-  red: '#FF0000',
-  black: '#1A1A1A',
-  text: '#333333',
-  muted: '#767676',
-  border: '#E5E5E5',
-  borderStrong: '#CCCCCC',
-  white: '#FFFFFF',
-};
+import { MailTemplate } from './mail-template';
 
 export default function mediacomValidationMail({
   data,
@@ -46,148 +28,67 @@ export default function mediacomValidationMail({
       }),
     },
   ];
+  const preview = 'Demande de validation - merci de valider la configuration.';
   return (
-    <Tailwind>
-      <Html lang="fr">
-        <Head>
-          <Font
-            fontFamily="Arial"
-            fallbackFontFamily="Helvetica"
-            fontWeight={400}
-            fontStyle="normal"
-          />
-        </Head>
-        <Preview>
-          Demande de validation - merci de valider la configuration.
-        </Preview>
-        <Body style={main}>
-          <Container style={container}>
-            {/* Wordmark */}
-            <Section>
-              <Img
-                alt="EPFL"
-                width={110}
-                height={32}
-                src="https://epfl-si.github.io/elements/svg/epfl-logo.svg"
-                style={{ display: 'inline-block' }}
-              />
-            </Section>
+    <MailTemplate preview={preview}>
+      <Heading className="text-xl font-bold text-black mb-2 mt-4">
+        Proposition de visite guidée
+      </Heading>
 
-            {/* Titre */}
-            <Heading style={title}>Proposition de visite guidée</Heading>
+      <Text className="text-sm/4 text-black mb-4">Bonjour,</Text>
+      <Text className="text-sm/4 text-black mb-4">
+        Vous avez reçu une demande de visite pour {data.place}
+      </Text>
 
-            <Text style={paragraph}>Bonjour,</Text>
-            <Text style={paragraph}>
-              Vous avez reçu une demande de visite pour {data.place}
-            </Text>
-
-            <Section style={{ marginBottom: '10px' }}>
-              {details.map((detail) => (
-                <Row>
-                  <Column width="8" valign="top" className="pr-[6px]">
-                    <Text className="m-0 text-black text-[14px] leading-[16px]">
-                      •
-                    </Text>
-                  </Column>
-                  <Column valign="top">
-                    <Text className="m-0 text-gray-500 text-[14px] leading-[16px]">
-                      {detail.label} <strong>{detail.content}</strong>
-                    </Text>
-                  </Column>
-                </Row>
-              ))}
-            </Section>
-
-            {/*  Guides*/}
-            <Section>
-              <Text style={paragraph}>
-                {data.guide.length > 1
-                  ? 'Les guides selectionnées sont : '
-                  : 'Le guide selectionné est :'}
+      <Section className="mb-3">
+        {details.map((detail, id) => (
+          <Row key={id}>
+            <Column width="8" valign="top" className="pr-[6px]">
+              <Text className="m-0 text-black text-[14px] leading-[16px]">
+                •
               </Text>
-              {data.guide.map((guide) => (
-                <Row>
-                  <Column width="8" valign="top" className="pr-[6px]">
-                    <Text className="m-0 text-black text-[14px] leading-[16px]">
-                      •
-                    </Text>
-                  </Column>
-                  <Column valign="top">
-                    <Text className="m-0 text-gray-500 text-[14px] leading-[16px]">
-                      {guide.name} {guide.lastName}
-                    </Text>
-                  </Column>
-                </Row>
-              ))}
-            </Section>
+            </Column>
+            <Column valign="top">
+              <Text className="m-0 text-gray-500 text-[14px] leading-[16px]">
+                {detail.label} <strong>{detail.content}</strong>
+              </Text>
+            </Column>
+          </Row>
+        ))}
+      </Section>
 
-            <Section style={{ marginTop: '24px', marginBottom: '8px' }}>
-              <Row>
-                <Button style={buttonBase} href={data.url}>
-                  Accéder à la demande
-                </Button>
-              </Row>
-            </Section>
+      <Section>
+        <Text className="text-sm/4 text-black mb-4">
+          {data.guide.length > 1
+            ? 'Les guides selectionnées sont : '
+            : 'Le guide selectionné est :'}
+        </Text>
+        {data.guide.map((guide, id) => (
+          <Row key={id}>
+            <Column width="8" valign="top" className="pr-[6px]">
+              <Text className="m-0 text-black text-[14px] leading-[16px]">
+                •
+              </Text>
+            </Column>
+            <Column valign="top">
+              <Text className="m-0 text-gray-500 text-[14px] leading-[16px]">
+                {guide.name} {guide.lastName}
+              </Text>
+            </Column>
+          </Row>
+        ))}
+      </Section>
 
-            <Hr style={{ borderColor: colors.border, marginTop: '20px' }} />
-
-            {/* Footer */}
-            <Text style={footer}>
-              Mediacom - École polytechnique fédérale de Lausanne (EPFL)
-              <br />
-              EPFL P-MEDIACOM, CM 2 360 (Centre Midi), Station 10, CH-1015
-              Lausanne
-            </Text>
-          </Container>
-        </Body>
-      </Html>
-    </Tailwind>
+      <Section className="mt-6 mb-2">
+        <Row>
+          <Button
+            href={data.url}
+            className="inline-block px-6 py-2 text-sm font-bold text-center bg-red-600 text-white"
+          >
+            Accéder à la demande
+          </Button>
+        </Row>
+      </Section>
+    </MailTemplate>
   );
 }
-
-// ---- Styles ----
-
-const main = {
-  backgroundColor: colors.white,
-  fontFamily: 'Arial, Helvetica, sans-serif',
-  boxSizing: 'border-box' as const,
-};
-
-const container = {
-  maxWidth: '680px',
-  margin: '0 auto',
-  padding: '0 32px',
-};
-
-const title = {
-  fontSize: '19px',
-  fontWeight: 700,
-  color: colors.black,
-  margin: '24px 0 4px 0',
-};
-
-const paragraph = {
-  fontSize: '15px',
-  lineHeight: '22px',
-  color: colors.text,
-  margin: '0 0 16px 0',
-};
-
-const buttonBase = {
-  display: 'inline-block',
-  padding: '11px 26px',
-  fontSize: '14px',
-  fontWeight: 700,
-  textDecoration: 'none',
-  textAlign: 'center' as const,
-  backgroundColor: colors.red,
-  color: colors.white,
-};
-
-const footer = {
-  fontSize: '12px',
-  lineHeight: '18px',
-  color: '#999999',
-  marginTop: '8px',
-  marginBottom: '32px',
-};
