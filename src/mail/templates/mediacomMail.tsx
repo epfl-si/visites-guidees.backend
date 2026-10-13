@@ -41,8 +41,8 @@ export default function mediacomValidationMail({
       </Text>
 
       <Section className="mb-3">
-        {details.map((detail) => (
-          <Row>
+        {details.map((detail, id) => (
+          <Row key={id}>
             <Column width="8" valign="top" className="pr-[6px]">
               <Text className="m-0 text-black text-[14px] leading-[16px]">
                 •
@@ -63,8 +63,8 @@ export default function mediacomValidationMail({
             ? 'Les guides selectionnées sont : '
             : 'Le guide selectionné est :'}
         </Text>
-        {data.guide.map((guide) => (
-          <Row>
+        {data.guide.map((guide, id) => (
+          <Row key={id}>
             <Column width="8" valign="top" className="pr-[6px]">
               <Text className="m-0 text-black text-[14px] leading-[16px]">
                 •

@@ -39,8 +39,8 @@ export function VisitGuideEmail({ data }: { data: guideNotification }) {
         Nous avons reçu une demande de visite pour {data.place}
       </Text>
       <Section>
-        {details.map((detail) => (
-          <Row>
+        {details.map((detail, id) => (
+          <Row key={id}>
             <Column width="8" valign="top" className="pr-[6px]">
               <Text className="m-0 text-black text-[14px] leading-[16px]">
                 •
