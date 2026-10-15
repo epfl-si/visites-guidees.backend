@@ -41,7 +41,7 @@ async function bootstrap() {
   SwaggerModule.setup('docs', app, documentFactory);
 
   app.enableCors({
-    origin: process.env.FRONTEND_URL,
+    origin: process.env.FRONTEND_URL?.split(' '),
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization'],
   });
