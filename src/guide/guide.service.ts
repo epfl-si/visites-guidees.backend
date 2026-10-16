@@ -6,8 +6,8 @@ import {
 import { PrismaService } from '../prisma.service';
 import { Prisma } from '../../generated/prisma/client';
 import { ListGuideDto } from './dto/list.dto';
-import { ReadGuideDto } from './dto/read.dto';
-import { CreateGuideDto } from './dto/create.dto';
+import { BlockedPeriodDto, ReadGuideDto } from './dto/read.dto';
+import { CreateBlockedPeriodGuide, CreateGuideDto } from './dto/create.dto';
 import { UpdateGuideDto } from './dto/update.dto';
 import { ApiService } from '../services/api/api.service';
 import { Person } from '../services/api/interfaces/person.interface';
@@ -125,6 +125,31 @@ export class GuideService {
 
     this.logger.log(`Created guide ${id}`);
     return guide as ReadGuideDto;
+  }
+
+  async createBlockedPeriod(
+    guideId: number,
+    createBlockedPeriodGuide: CreateBlockedPeriodGuide,
+  ): Promise<BlockedPeriodDto> {
+    const label = {
+      en: 'Absence',
+      fr: 'Absence',
+    };
+
+    const blockedPeriod = await this.prisma.blockedPeriod.create({
+      data: {
+        start: createBlockedPeriodGuide.start,
+        end: createBlockedPeriodGuide.end,
+        label: label,
+        guides: {
+          connect: {
+            id: guideId,
+          },
+        },
+      },
+    });
+
+    return blockedPeriod;
   }
 
   async update(
