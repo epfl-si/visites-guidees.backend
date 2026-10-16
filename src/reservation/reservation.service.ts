@@ -21,6 +21,7 @@ import { ReservationGuideAction } from './reservation-guide-action.enum';
 import { ReqEntraOauthUser } from '@/types/auth';
 import { mediacomValidation } from '@/mail/interfaces/mediacomValidation.interface';
 import { adminGroup } from '@/constant/auth';
+import { siteUrl } from '@/constant/sites';
 
 @Injectable()
 export class ReservationService {
@@ -194,7 +195,7 @@ export class ReservationService {
     await this.createGuideToReservation(reservation.id, compatibleGuidesIds);
 
     await this.mail.notifyGuide(compatibleGuidesIds, {
-      url: process.env.FRONTEND_URL + `/guide/reservations/${reservation.id}`,
+      url: siteUrl(language.code) + `/guide/reservations/${reservation.id}`,
       date: reservation.date,
       language: language.name,
       place: (place.title as { fr: string }).fr,

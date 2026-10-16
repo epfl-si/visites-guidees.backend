@@ -1,10 +1,11 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { WebpackHotModule } from './types/nestjs';
-import { ValidationPipe, VersioningType } from '@nestjs/common';
+import { Logger, ValidationPipe, VersioningType } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { TransformInterceptor } from './common/interceptors/transform.interceptor';
+import { corsOrigins } from './constant/sites';
 
 declare const module: WebpackHotModule;
 
@@ -40,8 +41,14 @@ async function bootstrap() {
 
   SwaggerModule.setup('docs', app, documentFactory);
 
+  const origins = corsOrigins();
+  if (origins.length === 0) {
+    throw new Error('No FRONTEND_URL_FR / FRONTEND_URL_EN configured');
+  }
+  Logger.log(`CORS origins: ${origins.join(', ')}`, 'Bootstrap');
+
   app.enableCors({
-    origin: process.env.FRONTEND_URL?.split(' '),
+    origin: origins,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization'],
   });
