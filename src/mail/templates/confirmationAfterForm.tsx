@@ -1,7 +1,7 @@
 import { Reservation } from '@/types/reservation';
 import { Column, Heading, Text, Row, Hr } from '@react-email/components';
 import { Place } from '@/types/place';
-import { MailTemplate } from './mail-template';
+import { MailLayout } from './mailLayout';
 
 export function ConfirmationAfterForm({
   reservation,
@@ -14,7 +14,7 @@ export function ConfirmationAfterForm({
     'Réservation de visite guidée EPFL - Nous avons bien reçu votre demande.';
 
   return (
-    <MailTemplate preview={preview}>
+    <MailLayout preview={preview}>
       <Heading className="text-xl font-bold text-black mb-4 mt-4">
         Réservation de visite guidée
       </Heading>
@@ -44,6 +44,6 @@ export function ConfirmationAfterForm({
         Nous traiterons votre demande dans les plus brefs délais.
       </Text>
       <Text>L'équipe des visites guidées</Text>
-    </MailTemplate>
+    </MailLayout>
   );
 }

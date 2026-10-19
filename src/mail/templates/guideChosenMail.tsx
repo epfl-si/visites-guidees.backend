@@ -8,7 +8,7 @@ import {
   Text,
 } from '@react-email/components';
 import { guideChosen } from '../interfaces/guideChosen.interface';
-import { MailTemplate } from './mail-template';
+import { MailLayout } from './mailLayout';
 
 export function GuideChosenEmail({ data }: { data: guideChosen }) {
   const details = [
@@ -36,7 +36,7 @@ export function GuideChosenEmail({ data }: { data: guideChosen }) {
   const preview = 'Vous animerez une visite guidée EPFL - voici les détails.';
 
   return (
-    <MailTemplate preview={preview}>
+    <MailLayout preview={preview}>
       <Heading className="text-xl font-bold text-black mb-4 mt-4">
         Vous animerez cette visite guidée
       </Heading>
@@ -73,6 +73,6 @@ export function GuideChosenEmail({ data }: { data: guideChosen }) {
           visites-guidees@epfl.ch
         </Link>
       </Text>
-    </MailTemplate>
+    </MailLayout>
   );
 }

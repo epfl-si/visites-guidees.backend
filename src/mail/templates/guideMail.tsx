@@ -7,7 +7,7 @@ import {
   Text,
 } from '@react-email/components';
 import { guideNotification } from '../interfaces/guideNotification.interface';
-import { MailTemplate } from './mail-template';
+import { MailLayout } from './mailLayout';
 
 export function VisitGuideEmail({ data }: { data: guideNotification }) {
   const details = [
@@ -28,7 +28,7 @@ export function VisitGuideEmail({ data }: { data: guideNotification }) {
     'Proposition de visite guidée EPFL - merci de confirmer votre disponibilité.';
 
   return (
-    <MailTemplate preview={preview}>
+    <MailLayout preview={preview}>
       <Heading className="text-xl font-bold text-black mb-4 mt-4">
         Proposition de visite guidée
       </Heading>
@@ -64,6 +64,6 @@ export function VisitGuideEmail({ data }: { data: guideNotification }) {
           </Button>
         </Row>
       </Section>
-    </MailTemplate>
+    </MailLayout>
   );
 }
