@@ -54,7 +54,7 @@ export class GuideService {
     }
 
     this.logger.log(`Read guide ${id}`);
-    return guide as ReadGuideDto;
+    return guide;
   }
 
   async readReservationsByGuide(id: number): Promise<ListReservationDto[]> {
@@ -170,7 +170,7 @@ export class GuideService {
     });
 
     this.logger.log(`Created guide ${id}`);
-    return guide as ReadGuideDto;
+    return guide;
   }
 
   async createBlockedPeriod(
@@ -228,7 +228,7 @@ export class GuideService {
       });
 
       this.logger.log(`Updated guide ${id}`);
-      return guide as ReadGuideDto;
+      return guide;
     } catch (error) {
       if (
         error instanceof Prisma.PrismaClientKnownRequestError &&

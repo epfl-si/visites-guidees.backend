@@ -8,6 +8,7 @@ import {
   IsNotEmpty,
 } from 'class-validator';
 import { IsNotBeforeToday } from '../../common/validators/is-not-before-today.validator';
+import { Type } from 'class-transformer';
 
 const UTC_ISO = /Z$/;
 const UTC_ISO_MESSAGE =
@@ -36,11 +37,13 @@ export class CreateGuideDto {
 
 export class CreateBlockedPeriodGuide {
   @ApiProperty()
+  @Type(() => Date)
   @IsDate()
   @IsNotEmpty()
   start!: Date;
 
   @ApiProperty()
+  @Type(() => Date)
   @IsDate()
   @IsNotEmpty()
   end!: Date;
