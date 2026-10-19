@@ -12,7 +12,7 @@ import {
 } from '@react-email/components';
 import React from 'react';
 
-export function MailTemplate({
+export function MailLayout({
   children,
   preview,
 }: {

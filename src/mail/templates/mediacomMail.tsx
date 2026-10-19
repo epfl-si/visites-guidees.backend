@@ -7,7 +7,7 @@ import {
   Text,
 } from '@react-email/components';
 import { mediacomValidation } from '../interfaces/mediacomValidation.interface';
-import { MailTemplate } from './mail-template';
+import { MailLayout } from './mailLayout';
 
 export default function mediacomValidationMail({
   data,
@@ -30,7 +30,7 @@ export default function mediacomValidationMail({
   ];
   const preview = 'Demande de validation - merci de valider la configuration.';
   return (
-    <MailTemplate preview={preview}>
+    <MailLayout preview={preview}>
       <Heading className="text-xl font-bold text-black mb-2 mt-4">
         Proposition de visite guidée
       </Heading>
@@ -89,6 +89,6 @@ export default function mediacomValidationMail({
           </Button>
         </Row>
       </Section>
-    </MailTemplate>
+    </MailLayout>
   );
 }
