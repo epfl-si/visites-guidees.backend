@@ -37,6 +37,14 @@ export class GuideController {
     return this.guideService.list();
   }
 
+  @Get('guide')
+  @ApiResponse({ type: ReadGuideDto })
+  @UseGuards(AzureAdGuard, GuideGuard)
+  @ApiBearerAuth('access-token')
+  readAsGuide(@Req() req: { user: ReqEntraOauthUser }): Promise<ReadGuideDto> {
+    return this.guideService.readAsGuide(Number(req.user.uniqueid));
+  }
+
   @Get(':id')
   @ApiResponse({ type: ReadGuideDto })
   @UseGuards(AzureAdGuard, GroupsGuard)
