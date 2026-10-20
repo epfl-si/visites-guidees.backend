@@ -1,4 +1,10 @@
-import { Controller, Get, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  ParseIntPipe,
+  UseGuards,
+  Param,
+} from '@nestjs/common';
 import { LanguageService } from './language.service';
 import { ApiBearerAuth, ApiResponse } from '@nestjs/swagger';
 import { LanguageDto } from './dto/language.dto';
@@ -16,7 +22,16 @@ export class LanguageController {
   @UseGuards(AzureAdGuard, GroupsGuard)
   @RequireGroups(adminGroup)
   @ApiBearerAuth('access-token')
-  findAll() {
-    return this.languageService.findAll();
+  findAll(): Promise<LanguageDto[]> {
+    return this.languageService.list();
+  }
+
+  @Get(':id')
+  @ApiResponse({ type: [LanguageDto] })
+  @UseGuards(AzureAdGuard, GroupsGuard)
+  @RequireGroups(adminGroup)
+  @ApiBearerAuth('access-token')
+  findById(@Param('id', ParseIntPipe) id: number): Promise<LanguageDto> {
+    return this.languageService.read(id);
   }
 }
