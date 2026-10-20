@@ -6,12 +6,13 @@ import {
 import { PrismaService } from '../prisma.service';
 import { Prisma } from '../../generated/prisma/client';
 import { ListGuideDto } from './dto/list.dto';
-import { ReadGuideDto } from './dto/read.dto';
-import { CreateGuideDto } from './dto/create.dto';
+import { BlockedPeriodDto, ReadGuideDto } from './dto/read.dto';
+import { CreateBlockedPeriodGuide, CreateGuideDto } from './dto/create.dto';
 import { UpdateGuideDto } from './dto/update.dto';
 import { ApiService } from '../services/api/api.service';
 import { Person } from '../services/api/interfaces/person.interface';
 import { AppLogger as Logger } from '@/logger.service';
+import { ListReservationDto } from '@/reservation/dto/list.dto';
 
 @Injectable()
 export class GuideService {
@@ -36,6 +37,10 @@ export class GuideService {
     return guides;
   }
 
+  async readAsGuide(id: number): Promise<ReadGuideDto> {
+    return this.read(id);
+  }
+
   async read(id: number): Promise<ReadGuideDto> {
     const guide = await this.prisma.guide.findUnique({
       where: { id },
@@ -54,6 +59,40 @@ export class GuideService {
 
     this.logger.log(`Read guide ${id}`);
     return guide as ReadGuideDto;
+  }
+
+  async readReservationsByGuide(id: number): Promise<ListReservationDto[]> {
+    const reservations = await this.prisma.reservation.findMany({
+      where: {
+        status: 'READY',
+        reservationGuides: {
+          some: {
+            guideId: id,
+            status: 'CHOSEN',
+          },
+        },
+      },
+      include: {
+        place: true,
+        language: true,
+        reservationGuides: {
+          where: { guideId: id },
+        },
+      },
+      orderBy: {
+        date: 'asc',
+      },
+    });
+
+    if (!reservations) {
+      this.logger.warn(`No reservation found with this guide id ${id}`);
+      throw new NotFoundException(
+        `No reservation found with this guide id ${id}`,
+      );
+    }
+
+    this.logger.log(`Read reservations of guide ${id}`);
+    return reservations;
   }
 
   async create(createGuideDto: CreateGuideDto): Promise<ReadGuideDto> {
@@ -136,6 +175,31 @@ export class GuideService {
 
     this.logger.log(`Created guide ${id}`);
     return guide as ReadGuideDto;
+  }
+
+  async createBlockedPeriod(
+    guideId: number,
+    createBlockedPeriodGuide: CreateBlockedPeriodGuide,
+  ): Promise<BlockedPeriodDto> {
+    const label = {
+      en: 'Absence',
+      fr: 'Absence',
+    };
+
+    const blockedPeriod = await this.prisma.blockedPeriod.create({
+      data: {
+        start: createBlockedPeriodGuide.start,
+        end: createBlockedPeriodGuide.end,
+        label: label,
+        guides: {
+          connect: {
+            id: guideId,
+          },
+        },
+      },
+    });
+
+    return blockedPeriod;
   }
 
   async update(
