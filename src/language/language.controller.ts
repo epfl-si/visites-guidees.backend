@@ -6,6 +6,7 @@ import {
   Param,
   Post,
   Body,
+  Put,
 } from '@nestjs/common';
 import { LanguageService } from './language.service';
 import { ApiBearerAuth, ApiResponse } from '@nestjs/swagger';
@@ -15,6 +16,7 @@ import { GroupsGuard } from '@/guards/groups.guard';
 import { RequireGroups } from '@/decorators/require-groups.decorator';
 import { adminGroup } from '@/constant/auth';
 import { CreateLanguageDto } from '@/language/dto/create.dto';
+import { UpdateLanguageDto } from './dto/update.dto';
 
 @Controller({ path: 'languages', version: '1' })
 export class LanguageController {
@@ -45,5 +47,17 @@ export class LanguageController {
   @ApiBearerAuth('access-token')
   create(@Body() createLanguageDto: CreateLanguageDto): Promise<LanguageDto> {
     return this.languageService.create(createLanguageDto);
+  }
+
+  @Put(':id')
+  @ApiResponse({ type: LanguageDto })
+  @UseGuards(AzureAdGuard, GroupsGuard)
+  @RequireGroups(adminGroup)
+  @ApiBearerAuth('access-token')
+  modify(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateLanguageDto: UpdateLanguageDto,
+  ): Promise<LanguageDto> {
+    return this.languageService.modify(id, updateLanguageDto);
   }
 }
