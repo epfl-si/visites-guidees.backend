@@ -7,6 +7,7 @@ import { PrismaService } from '../prisma.service';
 import { Logger } from '@nestjs/common';
 import { LanguageDto } from './dto/language.dto';
 import { CreateLanguageDto } from './dto/create.dto';
+import { UpdateLanguageDto } from './dto/update.dto';
 
 @Injectable()
 export class LanguageService {
@@ -65,6 +66,24 @@ export class LanguageService {
 
     this.logger.log(`New language create : ${createLanguageDto.name}.`);
 
+    return language;
+  }
+
+  async modify(
+    id: number,
+    updateLanguageDto: UpdateLanguageDto,
+  ): Promise<LanguageDto> {
+    const language = await this.prisma.language.update({
+      where: { id },
+      data: {
+        code: updateLanguageDto.code,
+        name: updateLanguageDto.name,
+      },
+    });
+
+    this.logger.log(
+      `Language ${updateLanguageDto.code} | ${updateLanguageDto.name} updated successfully to ${language.code} | ${language.name}`,
+    );
     return language;
   }
 }
