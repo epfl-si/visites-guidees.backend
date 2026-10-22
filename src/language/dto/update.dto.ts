@@ -1,4 +1,4 @@
 import { PartialType } from '@nestjs/swagger';
-import { LanguageDto } from './language.dto';
+import { CreateLanguageDto } from './create.dto';
 
-export class UpdateLanguageDto extends PartialType(LanguageDto) {}
+export class UpdateLanguageDto extends PartialType(CreateLanguageDto) {}
