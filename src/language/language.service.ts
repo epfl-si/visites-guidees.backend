@@ -15,7 +15,17 @@ export class LanguageService {
   constructor(private prisma: PrismaService) {}
 
   async list(): Promise<LanguageDto[]> {
-    const languages = await this.prisma.language.findMany();
+    const languages = await this.prisma.language.findMany({
+      include: {
+        _count: {
+          select: {
+            reservations: true,
+            places: true,
+            guides: true,
+          },
+        },
+      },
+    });
     if (languages.length === 0) {
       this.logger.warn('No language found');
       throw new NotFoundException('No language found');
