@@ -7,6 +7,7 @@ import {
   Post,
   Body,
   Put,
+  Delete,
 } from '@nestjs/common';
 import { LanguageService } from './language.service';
 import { ApiBearerAuth, ApiResponse } from '@nestjs/swagger';
@@ -59,5 +60,14 @@ export class LanguageController {
     @Body() updateLanguageDto: UpdateLanguageDto,
   ): Promise<LanguageDto> {
     return this.languageService.modify(id, updateLanguageDto);
+  }
+
+  @Delete(':id')
+  @ApiResponse({ type: LanguageDto })
+  @UseGuards(AzureAdGuard, GroupsGuard)
+  @RequireGroups(adminGroup)
+  @ApiBearerAuth('access-token')
+  delete(@Param('id', ParseIntPipe) id: number) {
+    return this.languageService.remove(id);
   }
 }

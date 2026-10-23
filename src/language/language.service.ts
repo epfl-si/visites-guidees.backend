@@ -3,6 +3,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import { Prisma } from '../../generated/prisma/client';
 import { PrismaService } from '../prisma.service';
 import { Logger } from '@nestjs/common';
 import { LanguageDto } from './dto/language.dto';
@@ -95,5 +96,29 @@ export class LanguageService {
       `Language ${updateLanguageDto.code} | ${updateLanguageDto.name} updated successfully to ${language.code} | ${language.name}`,
     );
     return language;
+  }
+
+  async remove(id: number): Promise<LanguageDto> {
+    try {
+      const language = await this.prisma.language.update({
+        where: { id },
+        data: {
+          deletedAt: new Date(),
+        },
+      });
+      this.logger.log(
+        `Language ${language.name} has been deleted successfully.`,
+      );
+      return language;
+    } catch (error) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2025'
+      ) {
+        this.logger.warn(`No language found with id ${id}`);
+        throw new NotFoundException(`No language found with id ${id}`);
+      }
+      throw error;
+    }
   }
 }
