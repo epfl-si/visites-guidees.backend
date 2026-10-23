@@ -105,6 +105,15 @@ export class LanguageService {
         data: {
           deletedAt: new Date(),
         },
+        include: {
+          _count: {
+            select: {
+              reservations: true,
+              places: true,
+              guides: true,
+            },
+          },
+        },
       });
       this.logger.log(
         `Language ${language.name} has been deleted successfully.`,
