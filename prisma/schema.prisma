@@ -87,9 +87,10 @@ model BlockedPeriod {
 }
 
 model Language {
-  id   Int    @id @default(autoincrement())
-  code String @unique
-  name String @unique
+  id        Int       @id @default(autoincrement())
+  code      String    @unique
+  name      String    @unique
+  deletedAt DateTime? @map("deleted_at")
 
   reservations Reservation[]
   guides       Guide[]
