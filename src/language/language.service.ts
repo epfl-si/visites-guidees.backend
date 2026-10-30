@@ -80,6 +80,42 @@ export class LanguageService {
     return language;
   }
 
+  async restore(id: number): Promise<LanguageDto> {
+    const language = await this.prisma.language.findUnique({
+      where: { id },
+    });
+
+    if (!language) {
+      this.logger.warn(`No language found at id : ${id}`);
+      throw new NotFoundException(`No language found at id : ${id}`);
+    }
+
+    if (!language.deletedAt) {
+      this.logger.warn(`The language : ${language.name} is not deleted.`);
+      throw new ConflictException(
+        `The language : ${language.name} is not deleted.`,
+      );
+    }
+
+    const restoreLanguage = await this.prisma.language.update({
+      where: { id },
+      data: {
+        deletedAt: null,
+      },
+      include: {
+        _count: {
+          select: {
+            reservations: true,
+            places: true,
+            guides: true,
+          },
+        },
+      },
+    });
+
+    return restoreLanguage;
+  }
+
   async modify(
     id: number,
     updateLanguageDto: UpdateLanguageDto,
@@ -89,6 +125,15 @@ export class LanguageService {
       data: {
         code: updateLanguageDto.code,
         name: updateLanguageDto.name,
+      },
+      include: {
+        _count: {
+          select: {
+            reservations: true,
+            places: true,
+            guides: true,
+          },
+        },
       },
     });
 

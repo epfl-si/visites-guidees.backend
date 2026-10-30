@@ -50,6 +50,15 @@ export class LanguageController {
     return this.languageService.create(createLanguageDto);
   }
 
+  @Post(':id/restore')
+  @ApiResponse({ type: LanguageDto })
+  @UseGuards(AzureAdGuard, GroupsGuard)
+  @RequireGroups(adminGroup)
+  @ApiBearerAuth('access-token')
+  restore(@Param('id', ParseIntPipe) id: number): Promise<LanguageDto> {
+    return this.languageService.restore(id);
+  }
+
   @Put(':id')
   @ApiResponse({ type: LanguageDto })
   @UseGuards(AzureAdGuard, GroupsGuard)
