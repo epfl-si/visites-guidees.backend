@@ -8,6 +8,7 @@ import {
 } from 'class-validator';
 import { ListGuideDto } from './list.dto';
 import { ResponsePlaceListDto } from '@/place/dto/response.dto';
+import { Prisma } from '../../../generated/prisma/client';
 
 export class BlockedPeriodDto {
   @ApiProperty()
@@ -20,7 +21,7 @@ export class BlockedPeriodDto {
     example: { en: 'Vacation', fr: 'Vacances' },
   })
   @IsObject()
-  label!: Record<string, string>;
+  label!: Prisma.JsonValue;
 
   @ApiProperty()
   @IsDate()

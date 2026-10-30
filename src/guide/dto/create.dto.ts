@@ -1,6 +1,14 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsArray, IsISO8601, Matches, IsNumber } from 'class-validator';
+import {
+  IsArray,
+  IsISO8601,
+  Matches,
+  IsNumber,
+  IsDate,
+  IsNotEmpty,
+} from 'class-validator';
 import { IsNotBeforeToday } from '../../common/validators/is-not-before-today.validator';
+import { Type } from 'class-transformer';
 
 const UTC_ISO = /Z$/;
 const UTC_ISO_MESSAGE =
@@ -25,4 +33,18 @@ export class CreateGuideDto {
   @Matches(UTC_ISO, { message: UTC_ISO_MESSAGE })
   @IsNotBeforeToday()
   startDate!: string;
+}
+
+export class CreateBlockedPeriodGuide {
+  @ApiProperty()
+  @Type(() => Date)
+  @IsDate()
+  @IsNotEmpty()
+  start!: Date;
+
+  @ApiProperty()
+  @Type(() => Date)
+  @IsDate()
+  @IsNotEmpty()
+  end!: Date;
 }

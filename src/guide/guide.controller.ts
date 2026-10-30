@@ -8,17 +8,21 @@ import {
   Param,
   ParseIntPipe,
   UseGuards,
+  Req,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiResponse } from '@nestjs/swagger';
 import { GuideService } from './guide.service';
-import { CreateGuideDto } from './dto/create.dto';
+import { CreateBlockedPeriodGuide, CreateGuideDto } from './dto/create.dto';
 import { UpdateGuideDto } from './dto/update.dto';
 import { ListGuideDto } from './dto/list.dto';
-import { ReadGuideDto } from './dto/read.dto';
+import { BlockedPeriodDto, ReadGuideDto } from './dto/read.dto';
 import { AzureAdGuard } from '../auth/azure-ad-auth.guard';
 import { GroupsGuard } from '../guards/groups.guard';
 import { RequireGroups } from '../decorators/require-groups.decorator';
 import { adminGroup } from '@/constant/auth';
+import { GuideGuard } from '@/guards/guide.guard';
+import { ListReservationDto } from '@/reservation/dto/list.dto';
+import { ReqEntraOauthUser } from '@/types/auth';
 
 @Controller({ path: 'guides', version: '1' })
 export class GuideController {
@@ -33,6 +37,14 @@ export class GuideController {
     return this.guideService.list();
   }
 
+  @Get('guide')
+  @ApiResponse({ type: ReadGuideDto })
+  @UseGuards(AzureAdGuard, GuideGuard)
+  @ApiBearerAuth('access-token')
+  readAsGuide(@Req() req: { user: ReqEntraOauthUser }): Promise<ReadGuideDto> {
+    return this.guideService.readAsGuide(Number(req.user.uniqueid));
+  }
+
   @Get(':id')
   @ApiResponse({ type: ReadGuideDto })
   @UseGuards(AzureAdGuard, GroupsGuard)
@@ -42,6 +54,16 @@ export class GuideController {
     return this.guideService.read(id);
   }
 
+  @Get(':id/visits')
+  @ApiResponse({ type: ListReservationDto })
+  @UseGuards(AzureAdGuard, GuideGuard)
+  @ApiBearerAuth('access-token')
+  readReservationsByGuide(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<ListReservationDto[]> {
+    return this.guideService.readReservationsByGuide(id);
+  }
+
   @Post()
   @ApiResponse({ type: ReadGuideDto })
   @UseGuards(AzureAdGuard, GroupsGuard)
@@ -49,6 +71,20 @@ export class GuideController {
   @ApiBearerAuth('access-token')
   create(@Body() createGuideDto: CreateGuideDto): Promise<ReadGuideDto> {
     return this.guideService.create(createGuideDto);
+  }
+
+  @Post('absence')
+  @ApiResponse({ type: BlockedPeriodDto })
+  @UseGuards(AzureAdGuard, GuideGuard)
+  @ApiBearerAuth('access-token')
+  createBlockedPeriod(
+    @Body() createBlockedPeriodGuide: CreateBlockedPeriodGuide,
+    @Req() req: { user: ReqEntraOauthUser },
+  ): Promise<BlockedPeriodDto> {
+    return this.guideService.createBlockedPeriod(
+      Number(req.user.uniqueid),
+      createBlockedPeriodGuide,
+    );
   }
 
   @Patch(':id')
